@@ -9,7 +9,6 @@ import { LedgerBrandMark } from "@/components/illustrations/ledger-lines";
 import { 
   ShieldCheck, 
   Globe, 
-  CalendarCheck,
   Lock,
   Wallet,
   CheckCircle2,
@@ -222,17 +221,6 @@ export function LoginView() {
                     Next daily: <strong className="text-primary">$17.00</strong>
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Overlapping Floating Pacing Pill */}
-            <div className="absolute -bottom-3 left-4 sm:left-8 flex items-center gap-3 rounded-xl border border-border bg-card/95 backdrop-blur-md px-4 py-2.5 shadow-xl">
-              <div className="p-1.5 rounded-lg bg-primary/15 text-primary">
-                <CalendarCheck className="size-4" />
-              </div>
-              <div className="leading-tight">
-                <div className="text-xs font-bold text-foreground">Paced for 5 Days</div>
-                <div className="text-[10px] font-mono text-muted-foreground">$18.50 each day guaranteed</div>
               </div>
             </div>
           </div>
