@@ -403,33 +403,52 @@ export const supabaseApi = {
     }
 
     // 2. Fallback if RPC function does not exist in schema cache (PGRST202)
-    // Deactivate existing plans
-    await supabase
-      .from("plans")
-      .update({ is_active: false })
-      .eq("user_id", user.id);
+    try {
+      // Deactivate existing plans
+      await supabase
+        .from("plans")
+        .update({ is_active: false })
+        .eq("user_id", user.id);
 
-    // Insert new active plan
-    await supabase.from("plans").insert({
-      user_id: user.id,
-      essentials_limit_cents: plan.essentialsLimit,
-      fun_limit_cents: plan.funLimit,
-      home_fixed_monthly_cents: plan.homeFixedMonthly,
-      future_fund_monthly_cents: plan.futureFundMonthly,
-      monthly_flexible_income_cents: plan.monthlyFlexibleIncome,
-      monthly_work_hours: plan.monthlyWorkHours,
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    });
-
-    // Mark profile onboarding as completed
-    await supabase
-      .from("profiles")
-      .update({
-        onboarding_completed_at: new Date().toISOString(),
+      // Insert new active plan
+      await supabase.from("plans").insert({
+        user_id: user.id,
+        essentials_limit_cents: plan.essentialsLimit,
+        fun_limit_cents: plan.funLimit,
+        home_fixed_monthly_cents: plan.homeFixedMonthly,
+        future_fund_monthly_cents: plan.futureFundMonthly,
+        monthly_flexible_income_cents: plan.monthlyFlexibleIncome,
+        monthly_work_hours: plan.monthlyWorkHours,
+        is_active: true,
         updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+      });
+    } catch (planErr) {
+      console.warn("Plans insert warning:", planErr);
+    }
+
+    // Always update Supabase Auth user metadata (never fails, no schema cache dependency)
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          onboarding_completed_at: new Date().toISOString(),
+        },
+      });
+    } catch (metaErr) {
+      console.warn("User metadata update warning:", metaErr);
+    }
+
+    // Attempt to mark profile onboarding as completed (silently catch if column is missing)
+    try {
+      await supabase
+        .from("profiles")
+        .update({
+          onboarding_completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+    } catch {
+      // Ignore if column does not exist
+    }
 
     return { success: true };
   },

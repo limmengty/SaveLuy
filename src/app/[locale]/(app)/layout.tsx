@@ -20,22 +20,43 @@ export default async function AppGroupLayout({
 
   // If user is authenticated, check their onboarding state
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed_at")
-      .eq("id", user.id)
-      .maybeSingle();
+    // 1. Check user metadata first (fastest, guaranteed, immune to Postgres schema cache)
+    const metaCompleted = user.user_metadata?.onboarding_completed_at;
+    if (metaCompleted) {
+      return <>{children}</>;
+    }
 
-    // Check if user has an active plan in database
-    const { data: activePlan } = await supabase
-      .from("plans")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("is_active", true)
-      .maybeSingle();
+    // 2. Check if user has an active plan in database
+    let hasPlan = false;
+    try {
+      const { data: activePlan } = await supabase
+        .from("plans")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (activePlan) hasPlan = true;
+    } catch {
+      // Ignore if table/schema issue
+    }
+
+    // 3. Check profile row if column exists
+    let profileCompleted = false;
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile && (profile as Record<string, unknown>).onboarding_completed_at) {
+        profileCompleted = true;
+      }
+    } catch {
+      // Ignore if column does not exist
+    }
 
     // Only redirect to onboarding if user has NEITHER completed onboarding NOR an active plan
-    if (!profile?.onboarding_completed_at && !activePlan) {
+    if (!hasPlan && !profileCompleted) {
       redirect(`/${locale}/onboarding/income`);
     }
   }

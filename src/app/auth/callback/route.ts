@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
   const code = searchParams.get("code");
-  const rawNext = searchParams.get("next");
+  const rawNext = searchParams.get("next"); 
   const safeNext = getSafeNextPath(rawNext, "/en-KH/today");
 
   // Determine true origin (respecting Vercel reverse proxy / x-forwarded headers)
@@ -47,60 +47,74 @@ export async function GET(request: Request) {
       user.email?.split("@")[0] ||
       "User";
 
-    let { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed_at, avatar_url")
-      .eq("id", user.id)
-      .maybeSingle();
+    let profile: Record<string, unknown> | null = null;
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      profile = data as Record<string, unknown> | null;
+    } catch {
+      // Ignore if table/columns don't exist
+    }
 
     // If profile row doesn't exist yet, insert it with avatar
     if (!profile) {
-      const { data: newProfile } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          email: user.email,
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          locale: "en-KH",
-        })
-        .select("onboarding_completed_at, avatar_url")
-        .maybeSingle();
-      profile = newProfile;
+      try {
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email,
+            display_name: displayName,
+            avatar_url: avatarUrl,
+            locale: "en-KH",
+          })
+          .select("*")
+          .maybeSingle();
+        profile = newProfile as Record<string, unknown> | null;
+      } catch {
+        // Table or RLS fallback
+      }
     } else if (avatarUrl && !profile.avatar_url) {
       // Sync Google avatar if profile had none
-      await supabase
-        .from("profiles")
-        .update({
-          avatar_url: avatarUrl,
-          display_name: displayName,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+      try {
+        await supabase
+          .from("profiles")
+          .update({
+            avatar_url: avatarUrl,
+            display_name: displayName,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+      } catch {
+        // Ignore
+      }
     }
 
-
     // Check if user already has an active plan in the database
-    const { data: activePlan } = await supabase
-      .from("plans")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("is_active", true)
-      .maybeSingle();
+    let hasActivePlan = false;
+    try {
+      const { data: activePlan } = await supabase
+        .from("plans")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (activePlan) hasActivePlan = true;
+    } catch {
+      // Ignore
+    }
 
-    // If onboarding is NOT completed and no plan exists, route to onboarding
-    if (!profile?.onboarding_completed_at && !activePlan) {
+    const hasMetaCompleted = Boolean(user.user_metadata?.onboarding_completed_at);
+    const hasProfileCompleted = Boolean(profile?.onboarding_completed_at);
+
+    // If onboarding is NOT completed anywhere and no plan exists, route to onboarding
+    if (!hasMetaCompleted && !hasProfileCompleted && !hasActivePlan) {
       return NextResponse.redirect(`${origin}/en-KH/onboarding/income`, {
         headers: { "Cache-Control": "no-store" },
       });
-    }
-
-    // If active plan exists but onboarding_completed_at was NULL, sync it
-    if (activePlan && !profile?.onboarding_completed_at) {
-      await supabase
-        .from("profiles")
-        .update({ onboarding_completed_at: new Date().toISOString() })
-        .eq("id", user.id);
     }
   }
 
