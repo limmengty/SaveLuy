@@ -55,7 +55,12 @@ export function ReviewStep({ locale }: ReviewStepProps) {
     futureMonthly: 4000,
   };
 
+  const [submitting, setSubmitting] = useState(false);
+
   const handleFinish = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+
     const finalPlan: Plan = {
       ...state.plan,
       essentialsLimit: templateMap.essentialsWeekly,
@@ -69,14 +74,14 @@ export function ReviewStep({ locale }: ReviewStepProps) {
     try {
       const { supabaseApi } = await import("@/lib/api/supabase-service");
       await supabaseApi.completeOnboarding(finalPlan);
-    } catch {
-      // Local fallback continues
+    } catch (err) {
+      console.error("Failed to sync onboarding to database:", err);
     }
 
     toast("Plan activated! Welcome to BrokeNoMore.");
     sessionStorage.removeItem("onboarding_income");
     sessionStorage.removeItem("onboarding_template");
-    router.push(`/${locale}/today`);
+    router.replace(`/${locale}/today`);
   };
 
   return (
@@ -129,9 +134,13 @@ export function ReviewStep({ locale }: ReviewStepProps) {
 
       <button
         onClick={handleFinish}
-        className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-opacity hover:opacity-90 cursor-pointer"
+        disabled={submitting}
+        className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
       >
-        Save &amp; Start Today
+        {submitting && (
+          <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+        )}
+        <span>{submitting ? "Activating Plan..." : "Save & Start Today"}</span>
       </button>
     </div>
   );

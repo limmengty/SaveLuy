@@ -388,31 +388,50 @@ export const supabaseApi = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    try {
-      // Execute atomic complete_onboarding RPC
-      const { data, error } = await supabase.rpc("complete_onboarding", {
-        p_essentials_cents: plan.essentialsLimit,
-        p_fun_cents: plan.funLimit,
-        p_home_fixed_cents: plan.homeFixedMonthly,
-        p_future_fund_cents: plan.futureFundMonthly,
-        p_monthly_flexible_income_cents: plan.monthlyFlexibleIncome,
-        p_monthly_work_hours: plan.monthlyWorkHours,
-      });
-      if (error) throw error;
-      return data;
-    } catch {
-      // 1. Fallback: Save Plan
-      await this.savePlan(plan);
+    // 1. Try atomic complete_onboarding RPC
+    const { data, error } = await supabase.rpc("complete_onboarding", {
+      p_essentials_cents: plan.essentialsLimit,
+      p_fun_cents: plan.funLimit,
+      p_home_fixed_cents: plan.homeFixedMonthly,
+      p_future_fund_cents: plan.futureFundMonthly,
+      p_monthly_flexible_income_cents: plan.monthlyFlexibleIncome,
+      p_monthly_work_hours: plan.monthlyWorkHours,
+    });
 
-      // 2. Mark profile as completed onboarding
-      await supabase
-        .from("profiles")
-        .update({
-          onboarding_completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+    if (!error) {
+      return data;
     }
+
+    // 2. Fallback if RPC function does not exist in schema cache (PGRST202)
+    // Deactivate existing plans
+    await supabase
+      .from("plans")
+      .update({ is_active: false })
+      .eq("user_id", user.id);
+
+    // Insert new active plan
+    await supabase.from("plans").insert({
+      user_id: user.id,
+      essentials_limit_cents: plan.essentialsLimit,
+      fun_limit_cents: plan.funLimit,
+      home_fixed_monthly_cents: plan.homeFixedMonthly,
+      future_fund_monthly_cents: plan.futureFundMonthly,
+      monthly_flexible_income_cents: plan.monthlyFlexibleIncome,
+      monthly_work_hours: plan.monthlyWorkHours,
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    });
+
+    // Mark profile onboarding as completed
+    await supabase
+      .from("profiles")
+      .update({
+        onboarding_completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    return { success: true };
   },
 
   // Update transaction label or envelope (US-012)
