@@ -8,11 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import { LedgerBrandMark } from "@/components/illustrations/ledger-lines";
 import { 
   ShieldCheck, 
-  ArrowUpRight, 
   Globe, 
-  Calendar,
+  CalendarCheck,
   Lock,
-  Wallet
+  Wallet,
+  CheckCircle2,
+  TrendingDown
 } from "lucide-react";
 
 export function LoginView() {
@@ -42,14 +43,14 @@ export function LoginView() {
   const otherLocaleLabel = locale === "km-KH" ? "English" : "ភាសាខ្មែរ";
 
   return (
-    <div className="relative min-h-svh bg-background text-foreground flex flex-col justify-between selection:bg-primary/20 selection:text-primary">
+    <div className="relative min-h-svh bg-background text-foreground flex flex-col justify-between selection:bg-primary/20 selection:text-primary overflow-x-hidden">
       {/* Top minimal navbar */}
-      <header className="container mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+      <header className="container mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link 
           href={`/${locale}/today`} 
           className="flex items-center gap-2.5 font-bold text-lg tracking-tight group"
         >
-          <LedgerBrandMark size={28} className="transition-transform group-hover:scale-105" />
+          <LedgerBrandMark size={28} className="transition-transform duration-200 group-hover:scale-105" />
           <span>
             Broke<span className="text-primary">No</span>More
           </span>
@@ -78,19 +79,19 @@ export function LoginView() {
         </div>
       </header>
 
-      {/* Hero section: Clean Balancify split layout */}
-      <main className="container mx-auto max-w-7xl px-6 flex-1 flex flex-col justify-center py-10 lg:py-16">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
-          {/* Left Column: Bold Typography & Direct Google Sign-In */}
+      {/* Hero section */}
+      <main className="container mx-auto max-w-7xl px-6 flex-1 flex flex-col justify-center py-8 lg:py-14">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-14">
+          {/* Left Column: Bold, Minimal Typography */}
           <div className="w-full lg:max-w-xl text-center lg:text-left space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.08]">
               {t("headline")}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
               {t("subheadline")}
             </p>
 
-            {/* Google Continue CTA button (matching Balancify material style) */}
+            {/* Google Continue CTA button */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button
                 onClick={handleGoogleLogin}
@@ -123,97 +124,115 @@ export function LoginView() {
                   </>
                 )}
               </button>
-
-              <Link
-                href={`/${locale}/today`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
-              >
-                <span>{t("guestExplore")}</span>
-                <ArrowUpRight className="size-3.5" />
-              </Link>
             </div>
 
-            {/* Trust disclaimer */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-muted-foreground/70 pt-2">
+            {/* Privacy note without mentioning Supabase */}
+            <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-muted-foreground/75 pt-2">
               <ShieldCheck className="size-3.5 text-primary" />
               <span>{t("securityBadge")}</span>
             </div>
           </div>
 
-          {/* Right Column: Clean App Preview Mockup */}
-          <div className="relative w-full max-w-[620px] flex items-center justify-center lg:justify-end">
-            {/* Ambient subtle backdrop bloom */}
+          {/* Right Column: Realistic, High-Fidelity App Mockup Device */}
+          <div className="relative w-full max-w-[620px] pb-6">
+            {/* Ambient soft glow behind mockup */}
             <div 
               aria-hidden="true" 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 rounded-full bg-primary/10 blur-[100px] pointer-events-none" 
             />
 
-            {/* Desktop / Tablet App Card Mockup */}
-            <div className="relative w-full rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-2xl space-y-4">
-              {/* Window Header dots */}
-              <div className="flex items-center justify-between pb-3 border-b border-border/40">
-                <div className="flex items-center gap-1.5">
-                  <div className="size-3 rounded-full bg-destructive/60" />
-                  <div className="size-3 rounded-full bg-warning/60" />
-                  <div className="size-3 rounded-full bg-primary/60" />
+            {/* Main Desktop Dashboard Window */}
+            <div className="relative rounded-2xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+              {/* Window Titlebar */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/60 bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <div className="size-3 rounded-full bg-destructive/70" />
+                  <div className="size-3 rounded-full bg-warning/70" />
+                  <div className="size-3 rounded-full bg-primary/70" />
                 </div>
-                <div className="text-[11px] font-mono text-muted-foreground/60">BrokeNoMore Engine · Live</div>
+                <div className="text-[11px] font-mono text-muted-foreground/70">brokenomore.app/today</div>
+                <div className="size-3" />
               </div>
 
-              {/* Today Hero Amount Card */}
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">Available Today</div>
-                  <div className="mt-1 text-3xl sm:text-4xl font-extrabold font-mono tracking-tight text-foreground">
-                    $18.50 <span className="text-xs font-sans text-muted-foreground">/ day</span>
+              {/* Dashboard Content */}
+              <div className="p-6 space-y-5">
+                {/* Available Today Hero Banner */}
+                <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+                      Available Today
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/20 text-primary border border-primary/30">
+                      <CheckCircle2 className="size-3" />
+                      On Plan
+                    </span>
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">On plan · Safe to spend today</div>
+
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-4xl sm:text-5xl font-extrabold font-mono text-foreground tracking-tight">
+                      $18.50
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">safe to spend today</span>
+                  </div>
+
+                  {/* Micro Progress Bar */}
+                  <div className="mt-4 space-y-1.5">
+                    <div className="h-1.5 w-full rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: "24%" }} />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+                      <span>$5.75 used today</span>
+                      <span>5 days left in week</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-3 sm:mt-0 flex items-center justify-center sm:justify-end gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
-                    ● Paced 5 days left
+
+                {/* Vault Envelopes Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3.5 rounded-xl border border-border/60 bg-secondary/25">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                        <Wallet className="size-3.5" />
+                      </div>
+                      <span className="text-xs font-semibold text-foreground">Flexible Weekly</span>
+                    </div>
+                    <div className="mt-2 font-mono text-base font-bold text-foreground">$92.50</div>
+                    <div className="text-[10px] text-muted-foreground">Groceries & outings</div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-border/60 bg-secondary/25">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-warning/10 text-warning">
+                        <Lock className="size-3.5" />
+                      </div>
+                      <span className="text-xs font-semibold text-foreground">Protected Vault</span>
+                    </div>
+                    <div className="mt-2 font-mono text-base font-bold text-primary">$450.00</div>
+                    <div className="text-[10px] text-muted-foreground">Rent, bills & savings</div>
+                  </div>
+                </div>
+
+                {/* Instant Purchase Check Simulation Snippet */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-secondary/15 text-xs">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="size-4 text-warning" />
+                    <span className="text-muted-foreground">Check: Lunch ($6.00)</span>
+                  </div>
+                  <span className="font-mono font-medium text-foreground">
+                    Next daily: <strong className="text-primary">$17.00</strong>
                   </span>
-                </div>
-              </div>
-
-              {/* Sample Envelopes list */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                      <Wallet className="size-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-foreground">Weekly Flexible</div>
-                      <div className="text-[11px] text-muted-foreground">Groceries & Fun</div>
-                    </div>
-                  </div>
-                  <div className="font-mono text-xs font-bold text-foreground">$92.50</div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-lg bg-warning/10 text-warning">
-                      <Lock className="size-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-foreground">Protected Vault</div>
-                      <div className="text-[11px] text-muted-foreground">Rent & Bills</div>
-                    </div>
-                  </div>
-                  <div className="font-mono text-xs font-bold text-primary">$450.00</div>
                 </div>
               </div>
             </div>
 
-            {/* Overlapping Floating Mobile Preview Badge */}
-            <div className="absolute -bottom-6 -left-4 sm:-left-8 hidden sm:flex items-center gap-3 rounded-2xl border border-border bg-card/95 backdrop-blur-md p-3.5 shadow-xl">
-              <div className="p-2.5 rounded-xl bg-primary/15 text-primary">
-                <Calendar className="size-5" />
+            {/* Overlapping Floating Pacing Pill */}
+            <div className="absolute -bottom-3 left-4 sm:left-8 flex items-center gap-3 rounded-xl border border-border bg-card/95 backdrop-blur-md px-4 py-2.5 shadow-xl">
+              <div className="p-1.5 rounded-lg bg-primary/15 text-primary">
+                <CalendarCheck className="size-4" />
               </div>
-              <div>
-                <div className="text-xs font-bold text-foreground">Next 5 Days Paced</div>
-                <div className="text-[11px] font-mono text-muted-foreground">$18.50 each day locked</div>
+              <div className="leading-tight">
+                <div className="text-xs font-bold text-foreground">Paced for 5 Days</div>
+                <div className="text-[10px] font-mono text-muted-foreground">$18.50 each day guaranteed</div>
               </div>
             </div>
           </div>
