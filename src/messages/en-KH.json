@@ -183,10 +183,19 @@
     "leaveToast": "Plan unchanged"
   },
   "auth": {
-    "signInTitle": "Clarity before you spend",
-    "signInSubtitle": "Know what's safe to spend today without breaking protected commitments.",
+    "headline": "Financial peace every morning.",
+    "subheadline": "One dependable number for today. Your rent, bills, and future savings remain strictly protected.",
     "googleSignIn": "Continue with Google",
-    "tagline": "A calm, mobile-first spending decision system."
+    "googleSignInDesc": "Instant access · No password to remember",
+    "feature1Title": "Today's Safe-to-Spend",
+    "feature1Desc": "A single calculated figure recomputed every morning from what's truly flexible.",
+    "feature2Title": "Impact Before You Tap",
+    "feature2Desc": "Simulate any purchase in 3 seconds to see how it reshapes the rest of your week.",
+    "feature3Title": "Fortress Envelopes",
+    "feature3Desc": "Home commitments and emergency funds are locked away from impulsive daily spending.",
+    "securityBadge": "Zero ads · No debt commingling · Supabase row-level encryption",
+    "guestExplore": "Explore sample ledger without signing in",
+    "switchLanguage": "Language"
   },
   "settings": {
     "title": "Settings",
