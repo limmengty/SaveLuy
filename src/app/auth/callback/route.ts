@@ -3,10 +3,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getSafeNextPath } from "@/lib/auth/safe-next-path";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
   const code = searchParams.get("code");
   const rawNext = searchParams.get("next");
   const safeNext = getSafeNextPath(rawNext, "/en-KH/today");
+
+  // Determine true origin (respecting Vercel reverse proxy / x-forwarded headers)
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  const origin = forwardedHost
+    ? `${forwardedProto}://${forwardedHost}`
+    : url.origin;
 
   if (!code) {
     return NextResponse.redirect(`${origin}/en-KH/login?reason=missing_code`, {
