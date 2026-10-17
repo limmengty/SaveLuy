@@ -19,9 +19,5 @@ export default async function PlanPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Plan" locale={locale}>
-      <PlanView locale={locale} />
-    </AppShell>
-  );
+  return <PlanView locale={locale} />;
 }

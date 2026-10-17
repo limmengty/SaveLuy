@@ -34,7 +34,7 @@ export function ChartCard({
     >
       <div className="space-y-3">
         {/* Header: Question & Badge */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-2.5">
           <h3 className="text-sm font-semibold text-foreground/90 leading-tight">
             {question}
           </h3>

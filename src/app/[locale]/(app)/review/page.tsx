@@ -19,9 +19,5 @@ export default async function ReviewPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Weekly review" locale={locale}>
-      <ReviewView />
-    </AppShell>
-  );
+  return <ReviewView />;
 }

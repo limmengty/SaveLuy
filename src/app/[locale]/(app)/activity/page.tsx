@@ -19,9 +19,5 @@ export default async function ActivityPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Activity" locale={locale}>
-      <ActivityView />
-    </AppShell>
-  );
+  return <ActivityView />;
 }

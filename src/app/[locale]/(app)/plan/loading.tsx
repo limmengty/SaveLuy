@@ -98,9 +98,5 @@ export function PlanSkeleton() {
 }
 
 export default function PlanLoading() {
-  return (
-    <AppShell title="Plan" locale="en-KH">
-      <PlanSkeleton />
-    </AppShell>
-  );
+  return <PlanSkeleton />;
 }

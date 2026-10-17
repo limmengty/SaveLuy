@@ -19,9 +19,5 @@ export default async function ProgressPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Progress" locale={locale}>
-      <ProgressView />
-    </AppShell>
-  );
+  return <ProgressView />;
 }

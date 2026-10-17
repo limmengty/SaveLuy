@@ -8,9 +8,5 @@ export default async function WaitListPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Wait list" locale={locale}>
-      <WaitListView />
-    </AppShell>
-  );
+  return <WaitListView />;
 }

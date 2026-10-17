@@ -19,9 +19,5 @@ export default async function TodayPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Today" locale={locale}>
-      <TodayView locale={locale} />
-    </AppShell>
-  );
+  return <TodayView locale={locale} />;
 }

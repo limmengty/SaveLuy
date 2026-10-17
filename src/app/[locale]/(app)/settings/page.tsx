@@ -19,9 +19,5 @@ export default async function SettingsPage({
 }) {
   const { locale } = await params;
 
-  return (
-    <AppShell title="Profile & settings" locale={locale}>
-      <SettingsView />
-    </AppShell>
-  );
+  return <SettingsView />;
 }

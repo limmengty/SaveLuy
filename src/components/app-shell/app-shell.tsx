@@ -190,7 +190,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       {/* Main Column */}
       <div className="flex flex-1 flex-col min-h-0 lg:pl-[232px] xl:pl-[248px]">
         {/* Unified Top Contextual Header with safe-area-inset-top */}
-        <header className="shrink-0 z-20 glass-header pt-[env(safe-area-inset-top,0px)] transform-gpu">
+        <header className="shrink-0 z-20 border-b border-border/80 bg-background safe-top">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:px-6 lg:h-16 lg:px-8">
             {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
@@ -236,7 +236,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         {/* ScrollRoot: The SINGLE Vertical Scroller */}
         <main
           id="app-scroll-root"
-          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px)+1rem)] focus:outline-none"
+          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 safe-bottom-scroll focus:outline-none"
         >
           <div className="mx-auto max-w-6xl">
             {children}
@@ -247,7 +247,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       {/* Mobile Restrained Glass Bottom Dock */}
       <nav
         aria-label="Main Navigation"
-        className="fixed inset-x-0 bottom-0 z-30 glass-dock pb-[env(safe-area-inset-bottom,0px)] lg:hidden shadow-lg shadow-black/10 transform-gpu"
+        className="fixed inset-x-0 bottom-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/10 transform-gpu"
       >
         <div className="mx-auto grid h-16 max-w-xl grid-cols-5 items-center px-1">
           <TabLink {...main[0]} active={isActive(main[0].to)} />

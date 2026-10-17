@@ -48,16 +48,16 @@ export function SpendingBreakdownChart({ data, period, onPeriodChange }: Spendin
       interpretation={interpretation}
       accessibleSummary={accessibleSummary}
       badge={
-        <div className="flex items-center rounded-lg border border-border bg-secondary/50 p-0.5 text-xs">
+        <div className="w-full sm:w-auto grid grid-cols-3 sm:flex sm:items-center rounded-xl border border-border/80 bg-secondary/50 p-1 text-xs">
           {(["this-week", "last-week", "this-month"] as SpendingPeriod[]).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => onPeriodChange(p)}
               className={cn(
-                "rounded-md px-2.5 py-1 text-2xs font-semibold transition-all cursor-pointer",
+                "rounded-lg px-2.5 py-1.5 sm:py-1 text-center text-xs font-semibold transition-all cursor-pointer truncate",
                 period === p
-                  ? "bg-card text-foreground shadow-xs"
+                  ? "bg-card text-foreground shadow-xs font-bold"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
