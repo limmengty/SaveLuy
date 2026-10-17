@@ -10,6 +10,13 @@ import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import { formatMoney } from "@/lib/money";
 import { Transaction } from "@/lib/wealth-engine/engine";
 import { TransactionDetailModal } from "./transaction-detail-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export function ActivityView() {
@@ -42,32 +49,61 @@ export function ActivityView() {
     groups.set(k, [...(groups.get(k) ?? []), t]);
   }
 
+  const filterOptions = [
+    { id: "all", label: t("all") },
+    { id: "essentials", label: t("essentials") },
+    { id: "fun", label: t("funMoney") },
+  ];
+
   return (
     <div className="max-w-3xl space-y-6">
-      {/* nuqs-driven filter bar (sticky with comfortable touch targets) */}
-      <div className="sticky top-14 z-10 -mx-4 -mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6 lg:top-16 lg:-mx-8 lg:px-8">
-        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-          <Filter className="size-4 shrink-0 text-primary" /> {t("filterBy")}
+      {/* Modern Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex items-center gap-2">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Filter className="size-3.5" />
+          </span>
+          <span className="text-sm font-semibold text-foreground">{t("filterBy")}</span>
+          <span className="text-xs text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded-full">
+            {filteredTransactions.length}
+          </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { id: "all", label: t("all") },
-            { id: "essentials", label: t("essentials") },
-            { id: "fun", label: t("funMoney") },
-          ].map((tab) => (
+
+        {/* Desktop & Tablet: Segmented Pill Control */}
+        <div className="hidden sm:inline-flex items-center rounded-xl border border-border bg-card p-1 shadow-xs">
+          {filterOptions.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setEnvelopeFilter(tab.id === "all" ? null : tab.id)}
               className={cn(
-                "inline-flex h-10 min-w-16 items-center justify-center rounded-xl px-4 text-sm font-semibold transition-all cursor-pointer",
+                "h-8 rounded-lg px-3.5 text-xs font-semibold transition-all cursor-pointer",
                 envelopeFilter === tab.id
-                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                  : "border border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground active:scale-[0.98]"
+                  ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
               )}
             >
               {tab.label}
             </button>
           ))}
+        </div>
+
+        {/* Mobile: Accessible Radix Select Dropdown */}
+        <div className="sm:hidden w-full">
+          <Select
+            value={envelopeFilter || "all"}
+            onValueChange={(val) => setEnvelopeFilter(val === "all" ? null : val)}
+          >
+            <SelectTrigger className="h-10 w-full rounded-xl bg-card">
+              <SelectValue placeholder={t("filterBy")} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterOptions.map((opt) => (
+                <SelectItem key={opt.id} value={opt.id}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

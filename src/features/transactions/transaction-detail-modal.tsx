@@ -17,6 +17,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const editSchema = z.object({
   label: z.string().min(1, "Label is required").max(50, "Label is too long"),
@@ -44,6 +51,7 @@ export function TransactionDetailModal({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
@@ -132,13 +140,18 @@ export function TransactionDetailModal({
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground">{t("envelope")}</label>
-              <select
-                {...register("envelope")}
-                className="w-full h-11 rounded-xl border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              <Select
+                defaultValue={transaction.envelope}
+                onValueChange={(val: "essentials" | "fun") => setValue("envelope", val, { shouldValidate: true })}
               >
-                <option value="essentials">{t("essentials")}</option>
-                <option value="fun">{t("funMoney")}</option>
-              </select>
+                <SelectTrigger className="h-11 rounded-xl">
+                  <SelectValue placeholder={t("envelope")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="essentials">{t("essentials")}</SelectItem>
+                  <SelectItem value="fun">{t("funMoney")}</SelectItem>
+                </SelectContent>
+              </Select>
               {errors.envelope && (
                 <p className="text-xs text-destructive">{errors.envelope.message}</p>
               )}

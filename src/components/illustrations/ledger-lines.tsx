@@ -402,3 +402,133 @@ export function LedgerBrandMark({ className, size = 32, ...props }: SVGProps<SVG
   );
 }
 
+/**
+ * Bespoke Hero Artwork: "Obsidian Ledger & Protected Vault Geometry"
+ * Elegant currentColor architectural SVG with calm precision lines, vault concentric arches,
+ * balance crossbeam, and prospective daily clarity indicator.
+ */
+export function LedgerClarityHeroArt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 540 460"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-auto drop-shadow-2xl"
+      aria-hidden="true"
+      {...props}
+    >
+      <defs>
+        <radialGradient id="ledgerGlow" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="ledgerBeam" x1="270" y1="50" x2="270" y2="400" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.5" />
+          <stop offset="60%" stopColor="var(--primary)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="transparent" />
+        </linearGradient>
+        <linearGradient id="cardGlow" x1="140" y1="180" x2="400" y2="340" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="var(--card)" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="var(--card)" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+
+      {/* Ambient Radial Aura */}
+      <circle cx="270" cy="220" r="210" fill="url(#ledgerGlow)" />
+
+      {/* Precision Ledger Grid Lines (Calm Cadence) */}
+      <g opacity="0.15" stroke="currentColor" strokeWidth="1">
+        <line x1="80" y1="100" x2="460" y2="100" strokeDasharray="3 6" />
+        <line x1="60" y1="170" x2="480" y2="170" strokeDasharray="3 6" />
+        <line x1="40" y1="240" x2="500" y2="240" strokeDasharray="3 6" />
+        <line x1="60" y1="310" x2="480" y2="310" strokeDasharray="3 6" />
+        <line x1="80" y1="380" x2="460" y2="380" strokeDasharray="3 6" />
+        <line x1="150" y1="60" x2="150" y2="420" strokeDasharray="3 6" />
+        <line x1="270" y1="40" x2="270" y2="430" stroke="url(#ledgerBeam)" strokeWidth="1.5" strokeDasharray="none" />
+        <line x1="390" y1="60" x2="390" y2="420" strokeDasharray="3 6" />
+      </g>
+
+      {/* Outer Vault Concentric Arcs */}
+      <circle cx="270" cy="225" r="170" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1.5" />
+      <circle cx="270" cy="225" r="135" stroke="var(--primary)" strokeOpacity="0.25" strokeWidth="1.5" strokeDasharray="5 7" />
+
+      {/* Floating Precision Diamond Compass */}
+      <polygon
+        points="270,75 282,95 270,115 258,95"
+        fill="var(--primary)"
+        fillOpacity="0.2"
+        stroke="var(--primary)"
+        strokeWidth="1.5"
+      />
+      <circle cx="270" cy="95" r="2.5" fill="var(--primary)" />
+
+      {/* Glass Architecture Primary Core: Daily Clarity Node */}
+      <rect
+        x="120"
+        y="145"
+        width="300"
+        height="160"
+        rx="20"
+        fill="url(#cardGlow)"
+        stroke="var(--border)"
+        strokeWidth="1.5"
+      />
+
+      {/* Accent Header Ribbon inside Core */}
+      <path
+        d="M120 165 C120 154 129 145 140 145 H400 C411 145 420 154 420 165 V192 H120 V165 Z"
+        fill="currentColor"
+        fillOpacity="0.04"
+      />
+      <line x1="120" y1="192" x2="420" y2="192" stroke="var(--border)" strokeWidth="1" />
+
+      {/* Window Controls (Minimalist Dots) */}
+      <circle cx="145" cy="168" r="4" fill="var(--primary)" fillOpacity="0.8" />
+      <circle cx="160" cy="168" r="4" fill="currentColor" fillOpacity="0.2" />
+      <circle cx="175" cy="168" r="4" fill="currentColor" fillOpacity="0.1" />
+
+      {/* Top Status Capsule: 100% Protected */}
+      <rect x="305" y="159" width="100" height="20" rx="10" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeOpacity="0.4" strokeWidth="1" />
+      <circle cx="317" cy="169" r="3" fill="var(--primary)" />
+      <line x1="326" y1="169" x2="393" y2="169" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* Center Metric Line: Available Today Vector */}
+      <line x1="150" y1="218" x2="225" y2="218" stroke="currentColor" strokeOpacity="0.4" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="150" y1="250" x2="295" y2="250" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" />
+      <line x1="305" y1="250" x2="350" y2="250" stroke="currentColor" strokeOpacity="0.2" strokeWidth="5" strokeLinecap="round" />
+
+      {/* Secondary Progress Bar */}
+      <line x1="150" y1="280" x2="390" y2="280" stroke="currentColor" strokeOpacity="0.1" strokeWidth="2" strokeLinecap="round" />
+      <line x1="150" y1="280" x2="260" y2="280" stroke="var(--primary)" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+
+      {/* Orbiting Satellite Node 1: Flexible Envelopes (Left) */}
+      <g transform="translate(60, 260)">
+        <rect x="0" y="0" width="130" height="68" rx="14" fill="var(--card)" fillOpacity="0.9" stroke="var(--border)" strokeWidth="1.2" />
+        <circle cx="24" cy="24" r="10" fill="var(--primary)" fillOpacity="0.15" stroke="var(--primary)" strokeWidth="1.2" />
+        <path d="M19 24L22 27L28 21" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="42" y1="22" x2="110" y2="22" stroke="currentColor" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+        <line x1="20" y1="46" x2="90" y2="46" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
+      </g>
+
+      {/* Orbiting Satellite Node 2: Protected Vault (Right) */}
+      <g transform="translate(350, 240)">
+        <rect x="0" y="0" width="130" height="68" rx="14" fill="var(--card)" fillOpacity="0.9" stroke="var(--border)" strokeWidth="1.2" />
+        <circle cx="24" cy="24" r="10" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1.2" />
+        <rect x="20" y="21" width="8" height="6" rx="1.5" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1" fill="none" />
+        <path d="M22 21V19C22 17.89 22.89 17 24 17C25.11 17 26 17.89 26 19V21" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1" />
+        <line x1="42" y1="22" x2="110" y2="22" stroke="currentColor" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+        <line x1="20" y1="46" x2="75" y2="46" stroke="currentColor" strokeOpacity="0.5" strokeWidth="3" strokeLinecap="round" />
+      </g>
+
+      {/* Connecting Flow Rays */}
+      <path d="M190 285 C220 300 240 310 270 310" stroke="var(--primary)" strokeOpacity="0.3" strokeWidth="1.5" strokeDasharray="3 4" fill="none" />
+      <path d="M350 270 C320 295 300 305 270 305" stroke="var(--primary)" strokeOpacity="0.3" strokeWidth="1.5" strokeDasharray="3 4" fill="none" />
+
+      {/* Bottom Foundation Balance Anchor */}
+      <ellipse cx="270" cy="380" rx="90" ry="12" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1.5" />
+      <circle cx="270" cy="380" r="4" fill="var(--primary)" />
+    </svg>
+  );
+}
+
+

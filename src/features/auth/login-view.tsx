@@ -5,15 +5,8 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { LedgerBrandMark } from "@/components/illustrations/ledger-lines";
-import { 
-  ShieldCheck, 
-  Globe, 
-  Lock,
-  Wallet,
-  CheckCircle2,
-  TrendingDown
-} from "lucide-react";
+import { LedgerBrandMark, LedgerClarityHeroArt } from "@/components/illustrations/ledger-lines";
+import { ShieldCheck, Globe } from "lucide-react";
 
 export function LoginView() {
   const t = useTranslations("auth");
@@ -63,39 +56,33 @@ export function LoginView() {
             <Globe className="size-3.5 text-primary" />
             <span>{otherLocaleLabel}</span>
           </Link>
-
-          <a
-            href="https://github.com/limmengty/BrokeNoMore"
-            target="_blank"
-            rel="noreferrer"
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label="GitHub repository"
-          >
-            <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
-              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-            </svg>
-          </a>
         </div>
       </header>
 
       {/* Hero section */}
-      <main className="container mx-auto max-w-7xl px-6 flex-1 flex flex-col justify-center py-8 lg:py-14">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-14">
-          {/* Left Column: Bold, Minimal Typography */}
-          <div className="w-full lg:max-w-xl text-center lg:text-left space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.08]">
+      <main className="container mx-auto max-w-7xl px-6 flex-1 flex flex-col justify-center py-8 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-16">
+          {/* Left Column: Focused, High-Trust Login & Positioning */}
+          <div className="lg:col-span-6 text-center lg:text-left space-y-7">
+            {/* Minimal Brand Category Pill */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/25 bg-primary/10 text-primary text-xs font-semibold tracking-wide">
+              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+              <span>Prospective Daily Clarity</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.06]">
               {t("headline")}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
               {t("subheadline")}
             </p>
 
-            {/* Google Continue CTA button */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+            {/* Elevated Google Continue CTA card */}
+            <div className="pt-2 flex flex-col items-center lg:items-start gap-4">
               <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="group relative flex h-12 items-center justify-center gap-3.5 rounded-full border border-border bg-card px-6 font-semibold text-[15px] text-foreground shadow-sm transition-all hover:bg-secondary hover:border-foreground/30 active:scale-[0.985] disabled:opacity-60 cursor-pointer"
+                className="group relative flex h-13 w-full sm:w-auto min-w-[260px] items-center justify-center gap-3.5 rounded-2xl border border-border/80 bg-card px-8 font-semibold text-[15px] text-foreground shadow-lg shadow-black/15 transition-all hover:bg-secondary hover:border-primary/40 active:scale-[0.985] disabled:opacity-60 cursor-pointer"
               >
                 {loading ? (
                   <span className="inline-block size-5 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
@@ -123,105 +110,25 @@ export function LoginView() {
                   </>
                 )}
               </button>
-            </div>
 
-            {/* Privacy note without mentioning Supabase */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-muted-foreground/75 pt-2">
-              <ShieldCheck className="size-3.5 text-primary" />
-              <span>{t("securityBadge")}</span>
+              {/* Privacy badge */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+                <ShieldCheck className="size-4 text-primary shrink-0" />
+                <span>{t("securityBadge")}</span>
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Realistic, High-Fidelity App Mockup Device */}
-          <div className="relative w-full max-w-[620px] pb-6">
-            {/* Ambient soft glow behind mockup */}
+          {/* Right Column: Bespoke Architectural Vector Art */}
+          <div className="lg:col-span-6 relative flex items-center justify-center">
+            {/* Ambient subtle backdrop radiance */}
             <div 
               aria-hidden="true" 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 rounded-full bg-primary/10 blur-[100px] pointer-events-none" 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] h-[360px] rounded-full bg-primary/10 blur-[90px] pointer-events-none" 
             />
 
-            {/* Main Desktop Dashboard Window */}
-            <div className="relative rounded-2xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-              {/* Window Titlebar */}
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/60 bg-muted/20">
-                <div className="flex items-center gap-2">
-                  <div className="size-3 rounded-full bg-destructive/70" />
-                  <div className="size-3 rounded-full bg-warning/70" />
-                  <div className="size-3 rounded-full bg-primary/70" />
-                </div>
-                <div className="text-[11px] font-mono text-muted-foreground/70">brokenomore.app/today</div>
-                <div className="size-3" />
-              </div>
-
-              {/* Dashboard Content */}
-              <div className="p-6 space-y-5">
-                {/* Available Today Hero Banner */}
-                <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                      Available Today
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/20 text-primary border border-primary/30">
-                      <CheckCircle2 className="size-3" />
-                      On Plan
-                    </span>
-                  </div>
-
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-4xl sm:text-5xl font-extrabold font-mono text-foreground tracking-tight">
-                      $18.50
-                    </span>
-                    <span className="text-xs text-muted-foreground font-medium">safe to spend today</span>
-                  </div>
-
-                  {/* Micro Progress Bar */}
-                  <div className="mt-4 space-y-1.5">
-                    <div className="h-1.5 w-full rounded-full bg-secondary/80 overflow-hidden">
-                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: "24%" }} />
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
-                      <span>$5.75 used today</span>
-                      <span>5 days left in week</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Vault Envelopes Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3.5 rounded-xl border border-border/60 bg-secondary/25">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                        <Wallet className="size-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold text-foreground">Flexible Weekly</span>
-                    </div>
-                    <div className="mt-2 font-mono text-base font-bold text-foreground">$92.50</div>
-                    <div className="text-[10px] text-muted-foreground">Groceries & outings</div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl border border-border/60 bg-secondary/25">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-warning/10 text-warning">
-                        <Lock className="size-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold text-foreground">Protected Vault</span>
-                    </div>
-                    <div className="mt-2 font-mono text-base font-bold text-primary">$450.00</div>
-                    <div className="text-[10px] text-muted-foreground">Rent, bills & savings</div>
-                  </div>
-                </div>
-
-                {/* Instant Purchase Check Simulation Snippet */}
-                <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-secondary/15 text-xs">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="size-4 text-warning" />
-                    <span className="text-muted-foreground">Check: Lunch ($6.00)</span>
-                  </div>
-                  <span className="font-mono font-medium text-foreground">
-                    Next daily: <strong className="text-primary">$17.00</strong>
-                  </span>
-                </div>
-              </div>
+            <div className="relative w-full max-w-[500px]">
+              <LedgerClarityHeroArt />
             </div>
           </div>
         </div>
