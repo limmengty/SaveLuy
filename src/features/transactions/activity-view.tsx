@@ -191,12 +191,12 @@ export function ActivityView() {
                         onClick={() => !txItem.reversed && setSelectedTx(txItem)}
                         className={cn("min-w-0 flex-1", !txItem.reversed && "cursor-pointer")}
                       >
-                        <div className="flex items-center gap-2">
-                          <p className={cn("text-sm font-semibold truncate", txItem.reversed && "line-through text-muted-foreground")}>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className={cn("text-sm font-semibold truncate max-w-[160px] xs:max-w-none", txItem.reversed && "line-through text-muted-foreground")}>
                             {txItem.label}
                           </p>
                           {txItem.reversed && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+                            <span className="inline-flex shrink-0 items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
                               {t("undone")}
                             </span>
                           )}
@@ -205,15 +205,15 @@ export function ActivityView() {
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                           <span
                             className={cn(
-                              "inline-block size-1.5 rounded-full",
+                              "inline-block size-1.5 rounded-full shrink-0",
                               isFun ? "bg-warning" : "bg-primary"
                             )}
                           />
-                          <span>
+                          <span className="truncate">
                             {isFun ? tCommon("funMoney") : tCommon("essentials")}
                           </span>
                           <span>·</span>
-                          <span>
+                          <span className="shrink-0 whitespace-nowrap">
                             {new Date(txItem.createdAt).toLocaleTimeString(dateLocale, {
                               hour: "numeric",
                               minute: "2-digit",
@@ -223,9 +223,9 @@ export function ActivityView() {
                       </div>
 
                       {/* Monetary Amount */}
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         <span className={cn(
-                          "money text-sm font-bold tracking-tight block",
+                          "money text-sm font-bold tracking-tight block whitespace-nowrap",
                           txItem.reversed ? "line-through text-muted-foreground/60" : "text-foreground"
                         )}>
                           −{formatMoney(txItem.amount)}

@@ -128,6 +128,7 @@ export function CheckPanel() {
     >
       <SheetContent
         side={mobile ? "bottom" : "right"}
+        hideCloseButton={mobile}
         className={cn(
           "flex flex-col gap-0 overflow-y-auto border-border bg-card p-0",
           mobile ? "max-h-[92dvh] rounded-t-3xl" : "w-[420px] sm:max-w-[420px]"

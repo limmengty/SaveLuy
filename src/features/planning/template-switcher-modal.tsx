@@ -112,7 +112,7 @@ export function TemplateSwitcherModal({
           <button
             type="button"
             onClick={handleDismiss}
-            className="rounded-xl p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
+            className="hidden sm:block rounded-xl p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="size-5" />
