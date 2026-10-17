@@ -8,7 +8,7 @@ export const metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "SaveLuy",
   },
   icons: {
@@ -19,8 +19,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f8f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0f17" },
+    { media: "(prefers-color-scheme: light)", color: "#fafaf8" },
+    { media: "(prefers-color-scheme: dark)", color: "#171c24" },
   ],
   width: "device-width",
   initialScale: 1,
