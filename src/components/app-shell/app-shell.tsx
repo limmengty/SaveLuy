@@ -190,7 +190,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       {/* Main Column */}
       <div className="flex flex-1 flex-col min-h-0 lg:pl-[232px] xl:pl-[248px]">
         {/* Unified Top Contextual Header with safe-area-inset-top */}
-        <header className="shrink-0 z-20 border-b border-border/80 bg-background safe-top">
+        <header className="shrink-0 z-20 border-b border-border/80 header-solid safe-top">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:px-6 lg:h-16 lg:px-8">
             {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
