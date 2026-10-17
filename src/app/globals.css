@@ -230,6 +230,20 @@
   animation: accordionDown 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@utility glass-header {
+  background-color: color-mix(in oklch, var(--background) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+@utility glass-dock {
+  background-color: color-mix(in oklch, var(--background) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-top: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+}
+
 @keyframes fadeNum {
   from {
     opacity: 0;
