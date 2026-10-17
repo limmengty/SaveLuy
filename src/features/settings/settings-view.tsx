@@ -211,7 +211,6 @@ export function SettingsView() {
                     </p>
                   </div>
                   <p className="text-base font-semibold text-foreground truncate">{userEmail}</p>
-                  <p className="text-xs text-muted-foreground font-mono">ID: {userId?.slice(0, 8)}...</p>
                 </div>
               </div>
 

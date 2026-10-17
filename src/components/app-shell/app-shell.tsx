@@ -40,7 +40,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           setAvatarUrl(effectiveAvatar);
         }
       } catch {
-        // Ignore unauthenticated or network errors
+        // Safe fallback
       }
     }
     loadAvatar();
@@ -81,27 +81,34 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
     return pathname.startsWith(to);
   };
 
-  // Derive active title dynamically from translated navigation items
   const activeNavItem =
     [...main, ...sub, { to: `/${locale}/settings`, label: t("settings") }].find((item) =>
       isActive(item.to)
     );
-  const displayTitle = title && title !== "Today" && title !== "Plan" && title !== "Activity" && title !== "Progress" && title !== "Weekly review" && title !== "Profile & settings" && title !== "Wait list"
-    ? title
-    : (activeNavItem?.label || title || t("today"));
+  const displayTitle =
+    title &&
+    title !== "Today" &&
+    title !== "Plan" &&
+    title !== "Activity" &&
+    title !== "Progress" &&
+    title !== "Weekly review" &&
+    title !== "Profile & settings" &&
+    title !== "Wait list"
+      ? title
+      : (activeNavItem?.label || title || t("today"));
 
   const formattedDate = isReady
     ? now.toLocaleDateString(locale, {
-        weekday: "long",
+        weekday: "short",
         month: "short",
         day: "numeric",
       })
     : "";
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[232px] flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex xl:w-[248px]">
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background text-foreground">
+      {/* Desktop Sidebar (Fixed left) */}
+      <aside className="fixed inset-y-0 left-0 hidden w-[232px] flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex xl:w-[248px] z-30">
         <div className="px-2 pb-8">
           <Link href={`/${locale}/today`} className="flex items-center gap-2.5 text-[17px] font-extrabold tracking-tight group">
             <LedgerBrandMark size={28} className="transition-transform group-hover:scale-105" />
@@ -124,7 +131,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
 
           <button
             onClick={() => setCheckOpen(true)}
-            className="my-2 flex h-11 items-center gap-3 rounded-xl bg-primary px-3 font-semibold text-primary-foreground transition-colors hover:opacity-90 cursor-pointer"
+            className="my-2 flex h-11 items-center gap-3 rounded-xl bg-primary px-3 font-semibold text-primary-foreground transition-all hover:opacity-95 shadow-sm shadow-primary/20 cursor-pointer active:scale-[0.98]"
           >
             <Calculator className="size-5" />
             {t("checkPurchase")}
@@ -182,31 +189,32 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         </nav>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="lg:pl-[232px] xl:pl-[248px]">
-        <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+      {/* Main Column */}
+      <div className="flex flex-1 flex-col min-h-0 lg:pl-[232px] xl:pl-[248px]">
+        {/* Unified Top Contextual Header with safe-area-inset-top */}
+        <header className="shrink-0 z-20 border-b border-border/80 bg-background/85 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:px-6 lg:h-16 lg:px-8">
-            {/* Left: Brand mark on mobile + active view title */}
+            {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
               <Link href={`/${locale}/today`} className="lg:hidden shrink-0 flex items-center" aria-label="BrokeNoMore Home">
                 <LedgerBrandMark size={26} />
               </Link>
-              <h1 className="truncate text-lg font-bold tracking-tight text-foreground lg:text-[26px]">
+              <h1 className="truncate text-lg font-bold tracking-tight text-foreground lg:text-[24px]">
                 {displayTitle}
               </h1>
             </div>
 
-            {/* Right: Date badge + Actions + Profile */}
+            {/* Right: Date pill + Context action + Profile trigger */}
             <div className="flex items-center gap-2.5">
               {formattedDate && (
-                <span className="text-xs font-medium text-muted-foreground bg-secondary/60 px-2.5 py-1 rounded-full whitespace-nowrap">
+                <span className="text-xs font-semibold text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full whitespace-nowrap">
                   {formattedDate}
                 </span>
               )}
               {action}
               <Link
                 href={`/${locale}/settings`}
-                aria-label="Profile"
+                aria-label="Profile & settings"
                 className="relative grid size-9 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors lg:hidden overflow-hidden"
               >
                 {avatarUrl ? (
@@ -227,31 +235,35 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           </div>
         </header>
 
-
-
-        <main className="page-in mx-auto max-w-6xl px-4 pb-32 pt-5 md:px-6 lg:px-8 lg:pb-12 lg:pt-8">
-          {children}
+        {/* ScrollRoot: The SINGLE Vertical Scroller */}
+        <main
+          id="app-scroll-root"
+          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px)+1rem)] focus:outline-none"
+        >
+          <div className="mx-auto max-w-6xl">
+            {children}
+          </div>
         </main>
-
       </div>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Restrained Glass Bottom Dock */}
       <nav
-        aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-sidebar pb-[env(safe-area-inset-bottom)] lg:hidden"
+        aria-label="Main Navigation"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/85 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] lg:hidden shadow-lg shadow-black/10"
       >
-        <div className="mx-auto grid h-16 max-w-xl grid-cols-5 items-center">
+        <div className="mx-auto grid h-16 max-w-xl grid-cols-5 items-center px-1">
           <TabLink {...main[0]} active={isActive(main[0].to)} />
           <TabLink {...main[1]} active={isActive(main[1].to) || isActive(`/${locale}/plan/wait-list`)} />
 
           <button
             onClick={() => setCheckOpen(true)}
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold cursor-pointer"
+            aria-label={t("check")}
+            className="flex flex-col items-center gap-0.5 text-xs font-semibold cursor-pointer active:scale-95 transition-transform"
           >
-            <span className="-mt-6 grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <span className="-mt-7 grid size-13 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-2 border-background">
               <Calculator className="size-6" />
             </span>
-            {t("check")}
+            <span className="text-[11px] font-bold text-foreground">{t("check")}</span>
           </button>
 
           <TabLink {...main[2]} active={isActive(main[2].to)} />
@@ -259,7 +271,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         </div>
       </nav>
 
-      {/* Global Check Panel */}
+      {/* Global Check Purchase Drawer */}
       <CheckPanel />
     </div>
   );
@@ -295,19 +307,19 @@ function TabLink({ to, label, icon: Icon, active }: NavLinkProps) {
     <Link
       href={to}
       className={cn(
-        "flex h-14 flex-col items-center justify-center gap-0.5 text-xs",
-        active ? "font-bold text-foreground" : "text-muted-foreground"
+        "flex h-14 flex-col items-center justify-center gap-1 text-[11px] transition-colors",
+        active ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
       <span
         className={cn(
-          "grid h-7 w-12 place-items-center rounded-full",
-          active && "bg-secondary"
+          "grid h-7 w-12 place-items-center rounded-full transition-all",
+          active && "bg-secondary text-primary"
         )}
       >
         <Icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />
       </span>
-      {label}
+      <span>{label}</span>
     </Link>
   );
 }

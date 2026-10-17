@@ -155,10 +155,10 @@ export const supabaseApi = {
           monthlyWorkHours: planRow.monthly_work_hours,
         }
       : {
-          essentialsLimit: 3000,
-          funLimit: 2000,
-          homeFixedMonthly: 12000,
-          futureFundMonthly: 4000,
+          essentialsLimit: 830,
+          funLimit: 550,
+          homeFixedMonthly: 10000,
+          futureFundMonthly: 3000,
           monthlyFlexibleIncome: 20000,
           monthlyWorkHours: 160,
         };

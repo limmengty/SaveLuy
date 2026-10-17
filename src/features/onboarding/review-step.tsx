@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
+import { ArrowLeft, Lock, AlertTriangle, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import type { Plan } from "@/lib/wealth-engine/engine";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, parseMoneyInputToCents, centsToInputValue, evaluatePlanFeasibility } from "@/lib/money";
+import { generateTemplatesForIncome } from "./template-generator";
+import { cn } from "@/lib/utils";
 
 interface ReviewStepProps {
   locale: string;
@@ -15,58 +17,75 @@ interface ReviewStepProps {
 export function ReviewStep({ locale }: ReviewStepProps) {
   const router = useRouter();
   const { state, updatePlan } = useWealthEngine();
-  const [templateId] = useState(() => {
-    if (typeof window === "undefined") return "balanced_starter";
-    try {
-      const stored = sessionStorage.getItem("onboarding_template");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.templateId) return parsed.templateId;
+
+  // Retrieve draft income
+  const incomeCents = useMemo(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("brokenomore.draft.income") || sessionStorage.getItem("onboarding_income");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.monthlyIncome) return Number(parsed.monthlyIncome);
+        }
+      } catch {
+        // Safe fallback
       }
-    } catch {
-      // Fallback
+    }
+    return 20000; // $200.00
+  }, []);
+
+  // Retrieve chosen template
+  const templateId = useMemo(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("brokenomore.draft.template") || sessionStorage.getItem("onboarding_template");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.templateId) return parsed.templateId;
+        }
+      } catch {
+        // Safe fallback
+      }
     }
     return "balanced_starter";
-  });
+  }, []);
 
-  const templateMap = {
-    balanced_starter: {
-      essentialsWeekly: 3000,
-      funWeekly: 2000,
-      fixedMonthly: 12000,
-      futureMonthly: 4000,
-    },
-    safety_first: {
-      essentialsWeekly: 2500,
-      funWeekly: 1000,
-      fixedMonthly: 13000,
-      futureMonthly: 5000,
-    },
-    flex_forward: {
-      essentialsWeekly: 3500,
-      funWeekly: 2500,
-      fixedMonthly: 11000,
-      futureMonthly: 3000,
-    },
-  }[templateId as "balanced_starter" | "safety_first" | "flex_forward"] || {
-    essentialsWeekly: 3000,
-    funWeekly: 2000,
-    fixedMonthly: 12000,
-    futureMonthly: 4000,
-  };
+  // Base template numbers dynamically calibrated to income
+  const baseTemplate = useMemo(() => {
+    const templates = generateTemplatesForIncome(incomeCents);
+    return templates.find((t) => t.id === templateId) || templates[0];
+  }, [incomeCents, templateId]);
 
+  // Editable local state for envelopes
+  const [essentialsWeekly, setEssentialsWeekly] = useState(baseTemplate.essentialsWeekly);
+  const [funWeekly, setFunWeekly] = useState(baseTemplate.funWeekly);
+  const [homeFixedMonthly, setHomeFixedMonthly] = useState(baseTemplate.homeFixedMonthly);
+  const [futureFundMonthly, setFutureFundMonthly] = useState(baseTemplate.futureFundMonthly);
   const [submitting, setSubmitting] = useState(false);
 
+  // Compute live feasibility equation
+  const feasibility = useMemo(() => {
+    return evaluatePlanFeasibility({
+      monthlyIncome: incomeCents,
+      homeFixedMonthly,
+      futureFundMonthly,
+      essentialsLimitWeekly: essentialsWeekly,
+      funLimitWeekly: funWeekly,
+    });
+  }, [incomeCents, homeFixedMonthly, futureFundMonthly, essentialsWeekly, funWeekly]);
+
   const handleFinish = async () => {
-    if (submitting) return;
+    if (submitting || feasibility.isOverallocated) return;
     setSubmitting(true);
 
     const finalPlan: Plan = {
       ...state.plan,
-      essentialsLimit: templateMap.essentialsWeekly,
-      funLimit: templateMap.funWeekly,
-      homeFixedMonthly: templateMap.fixedMonthly,
-      futureFundMonthly: templateMap.futureMonthly,
+      essentialsLimit: essentialsWeekly,
+      funLimit: funWeekly,
+      homeFixedMonthly,
+      futureFundMonthly,
+      monthlyFlexibleIncome: incomeCents,
+      monthlyWorkHours: 160,
     };
 
     updatePlan(finalPlan);
@@ -79,69 +98,191 @@ export function ReviewStep({ locale }: ReviewStepProps) {
     }
 
     toast("Plan activated! Welcome to BrokeNoMore.");
+    localStorage.removeItem("brokenomore.draft.income");
+    localStorage.removeItem("brokenomore.draft.template");
     sessionStorage.removeItem("onboarding_income");
     sessionStorage.removeItem("onboarding_template");
     router.replace(`/${locale}/today`);
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-6 px-4 py-8">
-      <div className="space-y-1">
-        <p className="eyebrow">Step 3 of 3</p>
-        <h1 className="text-2xl font-bold tracking-tight">Review Your Plan</h1>
-        <p className="text-sm text-muted-foreground">
-          Confirm your starting numbers. You can fine-tune these any time in the Plan tab.
-        </p>
-      </div>
-
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-xs font-semibold text-muted-foreground">Flexible Weekly Envelopes</h2>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-xl bg-secondary/50 p-3">
-            <span className="block text-xs text-muted-foreground">Essentials</span>
-            <span className="money text-base font-bold text-foreground">
-              {formatMoney(templateMap.essentialsWeekly)}/wk
-            </span>
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background text-foreground">
+      {/* Top Bar with Reversible Back Action */}
+      <header className="shrink-0 border-b border-border/80 bg-background/85 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
+        <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
+          <button
+            type="button"
+            onClick={() => router.push(`/${locale}/onboarding/template`)}
+            className="flex size-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer transition-colors"
+            aria-label="Back to Templates"
+          >
+            <ArrowLeft className="size-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">Step 3 of 3</span>
+            <div className="flex gap-1">
+              <span className="h-1.5 w-6 rounded-full bg-primary/40" />
+              <span className="h-1.5 w-6 rounded-full bg-primary/40" />
+              <span className="h-1.5 w-6 rounded-full bg-primary" />
+            </div>
           </div>
-          <div className="rounded-xl bg-secondary/50 p-3">
-            <span className="block text-xs text-muted-foreground">Fun money</span>
-            <span className="money text-base font-bold text-foreground">
-              {formatMoney(templateMap.funWeekly)}/wk
-            </span>
+          <div className="w-11" />
+        </div>
+      </header>
+
+      {/* Content Scroller */}
+      <main className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-6">
+        <div className="mx-auto max-w-md space-y-6">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Review & Adjust</h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Confirm your complete budget equation. No bank money moves; these boundaries power your daily spending clarity.
+            </p>
+          </div>
+
+          {/* Allocation Equation Card */}
+          <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Allocation Equation</h3>
+            <div className="space-y-2 text-sm divide-y divide-border/40">
+              <div className="flex justify-between py-1">
+                <span className="text-muted-foreground">Monthly Income</span>
+                <span className="money font-bold text-foreground">{formatMoney(incomeCents)}</span>
+              </div>
+              <div className="flex justify-between pt-2">
+                <span className="text-muted-foreground">− Protected Commitments</span>
+                <span className="money font-semibold text-foreground">−{formatMoney(feasibility.protectedMonthly)}</span>
+              </div>
+              <div className="flex justify-between pt-2">
+                <span className="text-muted-foreground">− Weekly Flexible (Mo. Eq)</span>
+                <span className="money font-semibold text-foreground">−{formatMoney(feasibility.weeklyFlexibleMonthlyEquivalent)}</span>
+              </div>
+              <div className="flex justify-between pt-2">
+                <span className="font-semibold text-foreground">= Unallocated Buffer</span>
+                <span
+                  className={cn(
+                    "money font-bold",
+                    feasibility.isOverallocated ? "text-destructive" : "text-primary"
+                  )}
+                >
+                  {feasibility.isOverallocated
+                    ? `−${formatMoney(feasibility.shortfallMonthly)}`
+                    : `+${formatMoney(feasibility.unallocatedBufferMonthly)}`}
+                </span>
+              </div>
+            </div>
+
+            {/* Invariant Status Badge */}
+            <div
+              className={cn(
+                "flex items-center gap-2 rounded-xl p-3 text-xs font-semibold",
+                feasibility.isOverallocated
+                  ? "bg-destructive/10 text-destructive border border-destructive/20"
+                  : "bg-primary/10 text-primary border border-primary/20"
+              )}
+            >
+              {feasibility.isOverallocated ? (
+                <>
+                  <AlertTriangle className="size-4 shrink-0" />
+                  <span>Overallocated by {formatMoney(feasibility.shortfallMonthly)}/mo. Adjust your envelopes below to activate.</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="size-4 shrink-0" />
+                  <span>Plan is feasible and balanced. Your Available Today starting baseline is ready.</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Editable Envelopes Section */}
+          <div className="space-y-4 rounded-2xl border border-border bg-card p-4.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Weekly Flexible Envelopes</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5 rounded-xl bg-secondary/50 p-3">
+                <span className="text-xs font-medium text-muted-foreground block">Essentials /wk</span>
+                <div className="flex items-center">
+                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={centsToInputValue(essentialsWeekly)}
+                    onChange={(e) => setEssentialsWeekly(parseMoneyInputToCents(e.target.value))}
+                    className="money w-full bg-transparent text-base font-bold text-foreground outline-none"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5 rounded-xl bg-secondary/50 p-3">
+                <span className="text-xs font-medium text-muted-foreground block">Fun Money /wk</span>
+                <div className="flex items-center">
+                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={centsToInputValue(funWeekly)}
+                    onChange={(e) => setFunWeekly(parseMoneyInputToCents(e.target.value))}
+                    className="money w-full bg-transparent text-base font-bold text-foreground outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-2">Protected Monthly Money</h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="size-4 text-muted-foreground" /> Home & fixed /mo
+                </span>
+                <div className="flex items-center max-w-[120px] justify-end">
+                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={centsToInputValue(homeFixedMonthly)}
+                    onChange={(e) => setHomeFixedMonthly(parseMoneyInputToCents(e.target.value))}
+                    className="money w-full bg-transparent text-sm font-bold text-foreground outline-none text-right"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="size-4 text-muted-foreground" /> Future fund /mo
+                </span>
+                <div className="flex items-center max-w-[120px] justify-end">
+                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={centsToInputValue(futureFundMonthly)}
+                    onChange={(e) => setFutureFundMonthly(parseMoneyInputToCents(e.target.value))}
+                    className="money w-full bg-transparent text-sm font-bold text-foreground outline-none text-right"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </main>
 
-        <h2 className="text-xs font-semibold text-muted-foreground pt-2">Protected Monthly Money</h2>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
-            <span className="flex items-center gap-2">
-              <Lock className="size-4 text-muted-foreground" /> Home & fixed
-            </span>
-            <span className="money font-bold">{formatMoney(templateMap.fixedMonthly)}/mo</span>
-          </div>
-          <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
-            <span className="flex items-center gap-2">
-              <Lock className="size-4 text-muted-foreground" /> Future fund
-            </span>
-            <span className="money font-bold">{formatMoney(templateMap.futureMonthly)}/mo</span>
-          </div>
+      {/* Sticky Bottom Action Footer */}
+      <footer className="shrink-0 border-t border-border/80 bg-background/90 backdrop-blur-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+        <div className="mx-auto max-w-md">
+          <button
+            onClick={handleFinish}
+            disabled={submitting || feasibility.isOverallocated}
+            className="h-13 w-full rounded-2xl bg-primary text-[15px] font-bold text-primary-foreground shadow-md shadow-primary/20 hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              <>
+                <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                <span>Activating Plan...</span>
+              </>
+            ) : (
+              <span>Activate My Plan</span>
+            )}
+          </button>
         </div>
-
-        <p className="pt-2 text-xs text-muted-foreground">
-          Protected funds are excluded from your daily spending allowance. Only flexible envelopes feed your Available Today number.
-        </p>
-      </div>
-
-      <button
-        onClick={handleFinish}
-        disabled={submitting}
-        className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
-      >
-        {submitting && (
-          <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-        )}
-        <span>{submitting ? "Activating Plan..." : "Save & Start Today"}</span>
-      </button>
+      </footer>
     </div>
   );
 }

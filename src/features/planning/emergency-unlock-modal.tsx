@@ -33,7 +33,7 @@ export function EmergencyUnlockModal({
 
   const emergencySchema = z.object({
     amount: z
-      .coerce.number()
+      .number()
       .positive(t("invalidAmount"))
       .refine((val) => Math.round(val * 100) <= maxAmountCents, {
         message: t("amountExceeds"),

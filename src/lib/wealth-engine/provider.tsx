@@ -13,11 +13,11 @@ import { setActiveCurrency } from "@/lib/money";
 const STORAGE_KEY = "brokenomore.state.v2";
 
 const defaultPlan: Plan = {
-  essentialsLimit: 3000, // $30.00
-  funLimit: 2000,        // $20.00
-  homeFixedMonthly: 12000,// $120.00
-  futureFundMonthly: 4000,// $40.00
-  monthlyFlexibleIncome: 20000, // $200.00
+  essentialsLimit: 830,   // $8.30/wk (~$36/mo)
+  funLimit: 550,          // $5.50/wk (~$24/mo)
+  homeFixedMonthly: 10000,// $100.00/mo
+  futureFundMonthly: 3000,// $30.00/mo
+  monthlyFlexibleIncome: 20000, // $200.00/mo
   monthlyWorkHours: 160,
 };
 

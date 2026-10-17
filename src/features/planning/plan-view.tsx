@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
-import { formatMoney, parseMoneyInputToCents, centsToInputValue } from "@/lib/money";
+import { formatMoney, parseMoneyInputToCents, centsToInputValue, evaluatePlanFeasibility } from "@/lib/money";
 import { ProgressBar } from "@/components/product/progress-bar";
 import { EmergencyUnlockModal } from "./emergency-unlock-modal";
 import type { Plan } from "@/lib/wealth-engine/engine";
@@ -101,8 +101,24 @@ export function PlanView({ locale }: { locale: string }) {
   const plan = state.plan;
 
   const setPlanField = (key: keyof Plan) => (cents: number) => {
+    const nextPlan = { ...plan, [key]: cents };
+    const feasibility = evaluatePlanFeasibility({
+      monthlyIncome: nextPlan.monthlyFlexibleIncome,
+      homeFixedMonthly: nextPlan.homeFixedMonthly,
+      futureFundMonthly: nextPlan.futureFundMonthly,
+      essentialsLimitWeekly: nextPlan.essentialsLimit,
+      funLimitWeekly: nextPlan.funLimit,
+    });
+
+    if (feasibility.isOverallocated) {
+      toast.error(
+        `Overallocated by ${formatMoney(feasibility.shortfallMonthly)}/mo. Adjust other envelopes to balance.`
+      );
+    } else {
+      toast.success(t("planUpdated"));
+    }
+
     updatePlan({ [key]: cents });
-    toast.success(t("planUpdated"));
   };
 
   return (
