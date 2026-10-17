@@ -244,24 +244,24 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         </main>
       </div>
 
-      {/* Mobile Restrained Glass Bottom Dock */}
+      {/* Mobile Restrained Bottom Dock */}
       <nav
         aria-label="Main Navigation"
-        className="fixed inset-x-0 bottom-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/10 transform-gpu"
+        className="fixed inset-x-0 bottom-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/5"
       >
-        <div className="mx-auto grid h-16 max-w-xl grid-cols-5 items-center px-1">
+        <div className="mx-auto grid h-14 max-w-xl grid-cols-5 items-center px-1">
           <TabLink {...main[0]} active={isActive(main[0].to)} />
           <TabLink {...main[1]} active={isActive(main[1].to) || isActive(`/${locale}/plan/wait-list`)} />
 
           <button
             onClick={() => setCheckOpen(true)}
             aria-label={t("check")}
-            className="flex flex-col items-center gap-0.5 text-xs font-semibold cursor-pointer active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center -mt-3 text-xs font-semibold cursor-pointer active:scale-95 transition-transform"
           >
-            <span className="-mt-7 grid size-13 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-2 border-background">
-              <Calculator className="size-6" />
+            <span className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/25 border-2 border-background">
+              <Calculator className="size-5" />
             </span>
-            <span className="text-[11px] font-bold text-foreground">{t("check")}</span>
+            <span className="text-[10px] font-bold text-foreground mt-0.5">{t("check")}</span>
           </button>
 
           <TabLink {...main[2]} active={isActive(main[2].to)} />
@@ -305,19 +305,19 @@ function TabLink({ to, label, icon: Icon, active }: NavLinkProps) {
     <Link
       href={to}
       className={cn(
-        "flex h-14 flex-col items-center justify-center gap-1 text-[11px] transition-colors",
+        "flex h-full flex-col items-center justify-center gap-0.5 text-[10px] transition-colors",
         active ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
       <span
         className={cn(
-          "grid h-7 w-12 place-items-center rounded-full transition-all",
+          "grid h-6 w-10 place-items-center rounded-full transition-all",
           active && "bg-secondary text-primary"
         )}
       >
-        <Icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />
+        <Icon className="size-4.5" strokeWidth={active ? 2.4 : 1.8} />
       </span>
-      <span>{label}</span>
+      <span className="leading-none mt-0.5">{label}</span>
     </Link>
   );
 }

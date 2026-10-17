@@ -235,18 +235,16 @@
 }
 
 @utility safe-bottom {
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @utility safe-bottom-scroll {
-  padding-bottom: calc(5.5rem + max(env(safe-area-inset-bottom, 0px), 16px));
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
 }
 
 @utility glass-dock {
-  background-color: color-mix(in oklch, var(--background) 90%, transparent);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+  background-color: var(--background);
+  border-top: 1px solid var(--border);
 }
 
 @keyframes fadeNum {
