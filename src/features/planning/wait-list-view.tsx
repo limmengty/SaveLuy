@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { LedgerEmptyWaitlist } from "@/components/illustrations/ledger-lines";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import { formatMoney } from "@/lib/money";
+import { cn } from "@/lib/utils";
 
 export function WaitListView() {
   const t = useTranslations("waitList");
@@ -72,6 +73,7 @@ export function WaitListView() {
               <div className="flex items-center gap-3">
                 <span className="money text-sm font-semibold">{formatMoney(item.amount)}</span>
                 <button
+                  disabled={!isReadyToReview}
                   onClick={() => {
                     addTransaction({
                       amount: item.amount,
@@ -81,8 +83,15 @@ export function WaitListView() {
                     removeWaitItem(item.id);
                     toast(t("addedToSpending", { label: item.label }));
                   }}
-                  className="min-h-11 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
+                  title={isReadyToReview ? t("buy") : "Locked until 24-hour cooling period completes"}
+                  className={cn(
+                    "min-h-11 rounded-xl px-4 py-2 text-xs font-semibold transition-all flex items-center gap-1.5",
+                    isReadyToReview
+                      ? "bg-primary text-primary-foreground hover:opacity-90 cursor-pointer shadow-sm shadow-primary/20"
+                      : "bg-secondary text-muted-foreground opacity-60 cursor-not-allowed border border-border"
+                  )}
                 >
+                  {!isReadyToReview && <Clock className="size-3.5" />}
                   {t("buy")}
                 </button>
                 <button

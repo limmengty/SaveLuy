@@ -34,6 +34,7 @@ export function TodayView({ locale }: TodayViewProps) {
   const t = useTranslations("today");
   const { computed, state, isReady, addTransaction, reverseTransaction, setCheckOpen } = useWealthEngine();
   const [showCalculationDetails, setShowCalculationDetails] = useState(false);
+  const [pendingQuickAddId, setPendingQuickAddId] = useState<string | null>(null);
 
   if (!isReady) {
     return (
@@ -216,50 +217,68 @@ export function TodayView({ locale }: TodayViewProps) {
             <span className="text-xs text-muted-foreground">1-tap capture</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
-            {state.quickActions.map((q) => (
-              <button
-                key={q.id}
-                onClick={() => {
-                  const tx = addTransaction({
-                    amount: q.amount,
-                    envelope: q.envelope,
-                    label: q.label,
-                  });
-                  toast(`${q.label} added · ${formatMoney(q.amount)}`, {
-                    action: {
-                      label: "Undo",
-                      onClick: () => reverseTransaction(tx.id),
-                    },
-                  });
-                }}
-                className="group flex h-[68px] items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:bg-secondary/60 active:scale-[0.98] cursor-pointer"
-              >
-                <div
-                  aria-hidden
-                  className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary sm:size-11"
-                >
-                  {q.label.toLowerCase().includes("coffee") ? (
-                    <LedgerIconCoffee className="size-5" />
-                  ) : q.label.toLowerCase().includes("meal") || q.label.toLowerCase().includes("food") ? (
-                    <LedgerIconMeal className="size-5" />
-                  ) : q.label.toLowerCase().includes("transport") ? (
-                    <LedgerIconTransport className="size-5" />
-                  ) : q.label.toLowerCase().includes("drink") ? (
-                    <LedgerIconDrink className="size-5" />
-                  ) : (
-                    <LedgerIconGroceries className="size-5" />
+            {state.quickActions.map((q) => {
+              const isPending = pendingQuickAddId === q.id;
+              return (
+                <button
+                  key={q.id}
+                  disabled={pendingQuickAddId !== null}
+                  onClick={() => {
+                    if (pendingQuickAddId !== null) return;
+                    setPendingQuickAddId(q.id);
+
+                    const tx = addTransaction({
+                      amount: q.amount,
+                      envelope: q.envelope,
+                      label: q.label,
+                    });
+
+                    toast(`${q.label} added · ${formatMoney(q.amount)}`, {
+                      action: {
+                        label: "Undo",
+                        onClick: () => reverseTransaction(tx.id),
+                      },
+                    });
+
+                    // Unlock button after 500ms debounce
+                    setTimeout(() => {
+                      setPendingQuickAddId(null);
+                    }, 500);
+                  }}
+                  className={cn(
+                    "group flex h-[68px] items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-all active:scale-[0.98]",
+                    isPending
+                      ? "opacity-60 cursor-wait bg-secondary"
+                      : "hover:border-primary/40 hover:bg-secondary/60 cursor-pointer"
                   )}
-                </div>
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <p className="truncate text-[13px] font-bold text-foreground group-hover:text-primary transition-colors sm:text-sm">
-                    {q.label}
-                  </p>
-                  <p className="money truncate text-xs font-semibold text-muted-foreground">
-                    {formatMoney(q.amount)}
-                  </p>
-                </div>
-              </button>
-            ))}
+                >
+                  <div
+                    aria-hidden
+                    className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary sm:size-11"
+                  >
+                    {q.label.toLowerCase().includes("coffee") ? (
+                      <LedgerIconCoffee className="size-5" />
+                    ) : q.label.toLowerCase().includes("meal") || q.label.toLowerCase().includes("food") ? (
+                      <LedgerIconMeal className="size-5" />
+                    ) : q.label.toLowerCase().includes("transport") ? (
+                      <LedgerIconTransport className="size-5" />
+                    ) : q.label.toLowerCase().includes("drink") ? (
+                      <LedgerIconDrink className="size-5" />
+                    ) : (
+                      <LedgerIconGroceries className="size-5" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <p className="truncate text-[13px] font-bold text-foreground group-hover:text-primary transition-colors sm:text-sm">
+                      {q.label}
+                    </p>
+                    <p className="money truncate text-xs font-semibold text-muted-foreground">
+                      {formatMoney(q.amount)}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
 
             <button
               onClick={() => setCheckOpen(true)}
@@ -273,9 +292,9 @@ export function TodayView({ locale }: TodayViewProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
-                  {t("otherAmount")}
+                  Custom
                 </p>
-                <p className="text-xs text-muted-foreground/70">Custom</p>
+                <p className="text-xs text-muted-foreground/70">{t("checkPurchase") || "Check impact"}</p>
               </div>
             </button>
           </div>
