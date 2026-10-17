@@ -236,19 +236,18 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         {/* ScrollRoot: The SINGLE Vertical Scroller */}
         <main
           id="app-scroll-root"
-          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 safe-bottom-scroll focus:outline-none"
+          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 pb-6 focus:outline-none"
         >
           <div className="mx-auto max-w-6xl">
             {children}
           </div>
         </main>
-      </div>
 
-      {/* Mobile Restrained Bottom Dock */}
-      <nav
-        aria-label="Main Navigation"
-        className="fixed inset-x-0 bottom-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/5"
-      >
+        {/* Mobile Restrained Bottom Dock */}
+        <nav
+          aria-label="Main Navigation"
+          className="shrink-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/5"
+        >
         <div className="mx-auto grid h-14 max-w-xl grid-cols-5 items-center px-1">
           <TabLink {...main[0]} active={isActive(main[0].to)} />
           <TabLink {...main[1]} active={isActive(main[1].to) || isActive(`/${locale}/plan/wait-list`)} />
@@ -268,6 +267,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           <TabLink {...main[3]} active={isActive(main[3].to)} />
         </div>
       </nav>
+      </div>
 
       {/* Global Check Purchase Drawer */}
       <CheckPanel />
