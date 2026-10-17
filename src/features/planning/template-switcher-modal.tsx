@@ -80,17 +80,22 @@ export function TemplateSwitcherModal({
   return (
     <div
       onClick={handleDismiss}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl max-h-[90dvh] flex flex-col rounded-3xl border border-border bg-card shadow-2xl overflow-hidden"
+        className="relative w-full max-w-xl max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl border-t sm:border border-border bg-card shadow-2xl overflow-hidden pb-[env(safe-area-inset-bottom,0px)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="template-modal-title"
       >
+        {/* Mobile Drag Indicator */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <span className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-border/60">
+        <div className="flex items-start justify-between p-5 sm:p-6 border-b border-border/60">
           <div>
             <div className="flex items-center gap-2">
               <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
