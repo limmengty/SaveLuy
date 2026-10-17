@@ -11,7 +11,8 @@ import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import { supabaseApi } from "@/lib/api/supabase-service";
 import { useTranslations } from "next-intl";
 import { CheckPanel } from "@/features/purchase-check/check-panel";
-import { LedgerBrandMark } from "@/components/illustrations/ledger-lines";
+import { SaveLuyLockup } from "@/components/brand/save-luy-lockup";
+import { SaveLuyMark } from "@/components/brand/save-luy-mark";
 
 interface AppShellProps {
   title?: string;
@@ -110,11 +111,8 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       {/* Desktop Sidebar (Fixed left) */}
       <aside className="fixed inset-y-0 left-0 hidden w-[232px] flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex xl:w-[248px] z-30">
         <div className="px-2 pb-8">
-          <Link href={`/${locale}/today`} className="flex items-center gap-2.5 text-[17px] font-extrabold tracking-tight group">
-            <LedgerBrandMark size={28} className="transition-transform group-hover:scale-105" />
-            <span>
-              Broke<span className="text-primary">No</span>More
-            </span>
+          <Link href={`/${locale}/today`} className="flex items-center gap-2.5 group" aria-label="SaveLuy Home">
+            <SaveLuyLockup markSize={28} wordmarkSize="md" />
           </Link>
         </div>
 
@@ -196,8 +194,8 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:px-6 lg:h-16 lg:px-8">
             {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
-              <Link href={`/${locale}/today`} className="lg:hidden shrink-0 flex items-center" aria-label="BrokeNoMore Home">
-                <LedgerBrandMark size={26} />
+              <Link href={`/${locale}/today`} className="lg:hidden shrink-0 flex items-center" aria-label="SaveLuy Home">
+                <SaveLuyMark size={26} />
               </Link>
               <h1 className="truncate text-lg font-bold tracking-tight text-foreground lg:text-[24px]">
                 {displayTitle}

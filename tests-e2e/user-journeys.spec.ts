@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("BrokeNoMore End-to-End User Journeys", () => {
+test.describe("SaveLuy End-to-End User Journeys", () => {
   test.beforeEach(async ({ context }) => {
     await context.setExtraHTTPHeaders({
       "x-playwright-test": "true",
@@ -10,7 +10,7 @@ test.describe("BrokeNoMore End-to-End User Journeys", () => {
   test("User can load Today dashboard, perform quick add, and see Available Today update", async ({ page }) => {
     // 1. Visit Today dashboard
     await page.goto("/en-KH/today");
-    await expect(page).toHaveTitle(/BrokeNoMore/);
+    await expect(page).toHaveTitle(/SaveLuy/);
 
     // 2. Check Available Today hero
     const availableTodayText = page.locator(".amount-hero");

@@ -52,7 +52,7 @@ export function AdminShell({ children, locale }: AdminShellProps) {
           <div className="flex items-center justify-between px-2">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Console</span>
-              <h2 className="text-lg font-bold tracking-tight">BrokeNoMore Admin</h2>
+              <h2 className="text-lg font-bold tracking-tight">SaveLuy Admin</h2>
             </div>
           </div>
 

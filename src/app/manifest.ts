@@ -2,8 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BrokeNoMore — What can I spend today?",
-    short_name: "BrokeNoMore",
+    name: "SaveLuy — Know what you can safely spend today.",
+    short_name: "SaveLuy",
+    id: "saveluy-pwa-v1",
     description: "A calm daily spending decision system with instant capture and purchase impact checking.",
     start_url: "/",
     display: "standalone",

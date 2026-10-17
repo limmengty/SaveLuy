@@ -12,6 +12,13 @@ export interface Transaction {
   reversed?: boolean;
 }
 
+export interface EmergencyUnlockRecord {
+  id: string;
+  amountCents: number;
+  reason: string;
+  createdAt: string; // ISO date string
+}
+
 export interface Plan {
   essentialsLimit: number; // cents
   funLimit: number; // cents
@@ -19,6 +26,14 @@ export interface Plan {
   futureFundMonthly: number; // cents
   monthlyFlexibleIncome: number; // cents
   monthlyWorkHours: number; // hours
+  emergencyReliefCents?: number; // one-time emergency spend relief credited to active cycle (cents)
+  emergencyUnlockedTotalCents?: number; // cumulative emergency funds unlocked this cycle (cents)
+  lastEmergencyReason?: string; // audit note of latest emergency draw
+  lastEmergencyDate?: string; // ISO date string of latest unlock
+  emergencyHistory?: EmergencyUnlockRecord[]; // audit records of emergency unlocks
+  cycleAnchorDay?: number; // 0 = Sunday, 1 = Monday (default), etc.
+  lastReviewedWeekStart?: string; // ISO date string of reviewed cycle start
+  lastReviewAction?: "future" | "carry" | "leave"; // disposition choice made
 }
 
 export interface DayInputs {
@@ -99,16 +114,18 @@ export function futureValue(amount: number, annualRate = 0.09, years = 10): numb
   return Math.round(amount * Math.pow(1 + annualRate, years));
 }
 
-// Week runs Monday 00:00 -> Sunday 23:59 local time
-export function weekStart(now: Date): Date {
+// Week runs from anchor day (default Monday = 1) 00:00 -> anchor day - 1 23:59 local time
+export function weekStart(now: Date, anchorDay: number = 1): Date {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dow = (d.getDay() + 6) % 7; // Monday = 0
-  d.setDate(d.getDate() - dow);
+  const currentDow = d.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+  const diff = (currentDow - anchorDay + 7) % 7;
+  d.setDate(d.getDate() - diff);
   return d;
 }
 
 export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
-  const start = weekStart(now);
+  const anchorDay = typeof plan.cycleAnchorDay === "number" ? plan.cycleAnchorDay : 1;
+  const start = weekStart(now, anchorDay);
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const daysElapsed = Math.round((todayStart.getTime() - start.getTime()) / 86400000);
   const daysRemainingIncludingToday = Math.max(1, 7 - daysElapsed);
@@ -133,7 +150,8 @@ export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
     }
   }
 
-  const weeklyFlexibleLimit = plan.essentialsLimit + plan.funLimit;
+  const emergencyRelief = Math.max(0, plan.emergencyReliefCents ?? 0);
+  const weeklyFlexibleLimit = plan.essentialsLimit + plan.funLimit + emergencyRelief;
   const d = daily({
     weeklyFlexibleLimit,
     spendBeforeToday: before,
@@ -160,9 +178,10 @@ export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
     daysRemainingAfterToday: Math.max(0, daysRemainingIncludingToday - 1),
     envelopeSpent: { essentials: ess, fun },
     envelopeRemaining: {
-      essentials: plan.essentialsLimit - ess,
+      essentials: plan.essentialsLimit + emergencyRelief - ess,
       fun: plan.funLimit - fun,
     },
+    emergencyRelief,
     status,
     weekStart: start,
   };

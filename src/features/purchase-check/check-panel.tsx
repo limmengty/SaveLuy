@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, ChevronDown, Clock, Delete, Gauge } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock, Delete, Gauge, Heart, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import {
@@ -133,43 +133,72 @@ export function CheckPanel() {
           mobile ? "max-h-[92dvh] rounded-t-3xl" : "w-[420px] sm:max-w-[420px]"
         )}
       >
-        <SheetHeader className="px-5 pb-2 pt-5 text-left">
-          <SheetTitle className="text-lg">{t("title")}</SheetTitle>
-          <SheetDescription>
+        {/* Mobile iOS Sheet Drag Handle */}
+        {mobile && (
+          <div className="flex justify-center pt-3 pb-1">
+            <span className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+          </div>
+        )}
+
+        <SheetHeader className="px-5 pb-2 pt-3 text-left">
+          <SheetTitle className="text-xl font-bold tracking-tight text-foreground">{t("title")}</SheetTitle>
+          <SheetDescription className="text-xs text-muted-foreground leading-relaxed">
             {t("subtitle")}
           </SheetDescription>
         </SheetHeader>
 
         <div className="px-5">
-          <p
-            className="money py-3 text-center text-[40px] font-bold leading-[44px] lg:text-[48px] lg:leading-[52px]"
-            aria-live="polite"
-          >
-            {formatMoney(amount)}
-          </p>
+          {/* Calibrated Dynamic Money Display */}
+          <div className="my-2 flex flex-col items-center justify-center rounded-2xl border border-border/80 bg-secondary/30 p-4">
+            <p
+              className={cn(
+                "money font-black tracking-tight text-foreground transition-all",
+                amount >= 10000000
+                  ? "text-2xl leading-tight"
+                  : amount >= 100000
+                    ? "text-3xl leading-tight"
+                    : "text-4xl leading-tight sm:text-5xl"
+              )}
+              aria-live="polite"
+            >
+              {formatMoney(amount)}
+            </p>
+          </div>
 
-          <div role="radiogroup" aria-label="Envelope" className="grid grid-cols-2 gap-2">
-            {(["essentials", "fun"] as const).map((e) => (
-              <button
-                key={e}
-                role="radio"
-                aria-checked={env === e}
-                onClick={() => setEnv(e)}
-                className={cn(
-                  "min-h-12 rounded-xl border px-3 py-2 text-left transition-colors cursor-pointer",
-                  env === e
-                    ? "border-primary bg-primary/10"
-                    : "bg-secondary/40 hover:bg-secondary"
-                )}
-              >
-                <span className="block text-sm font-semibold">
-                  {e === "fun" ? tToday("funMoney") : tToday("essentials")}
-                </span>
-                <span className="money block text-xs text-muted-foreground">
-                  {tToday("left", { amount: formatMoney(computed.envelopeRemaining[e]) })}
-                </span>
-              </button>
-            ))}
+          {/* Envelope Selector Cards */}
+          <div role="radiogroup" aria-label="Envelope" className="grid grid-cols-2 gap-2.5">
+            {(["essentials", "fun"] as const).map((e) => {
+              const isSelected = env === e;
+              const isFun = e === "fun";
+              const EnvelopeIcon = isFun ? Heart : ShoppingBag;
+
+              return (
+                <button
+                  key={e}
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => setEnv(e)}
+                  className={cn(
+                    "flex flex-col gap-1.5 rounded-2xl border p-3.5 text-left transition-all cursor-pointer",
+                    isSelected
+                      ? isFun
+                        ? "border-warning bg-warning/10 shadow-xs shadow-warning/20 ring-1 ring-warning/30"
+                        : "border-primary bg-primary/10 shadow-xs shadow-primary/20 ring-1 ring-primary/30"
+                      : "border-border bg-card hover:bg-secondary/60"
+                  )}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <EnvelopeIcon className={cn("size-3.5", isSelected ? (isFun ? "text-warning" : "text-primary") : "text-muted-foreground")} />
+                    <span className="block text-xs font-bold leading-normal text-foreground">
+                      {isFun ? tToday("funMoney") : tToday("essentials")}
+                    </span>
+                  </div>
+                  <span className="money block text-[11px] font-semibold text-muted-foreground">
+                    {tToday("left", { amount: formatMoney(computed.envelopeRemaining[e]) })}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {amount > 0 && (
@@ -215,33 +244,36 @@ export function CheckPanel() {
           )}
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-1.5 px-5">
+        {/* Tactile Keypad */}
+        <div className="mt-3 grid grid-cols-3 gap-2 px-5">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0", "del"].map((k) => (
             <button
               key={k}
               onClick={() => press(k)}
               aria-label={k === "del" ? "Delete digit" : k}
-              className="money grid h-12 place-items-center rounded-xl bg-secondary/50 text-xl font-semibold transition-colors hover:bg-secondary active:bg-secondary cursor-pointer"
+              className="money flex h-13 items-center justify-center rounded-2xl border border-border/60 bg-secondary/40 text-xl font-bold text-foreground transition-all hover:bg-secondary active:scale-95 active:bg-secondary/90 cursor-pointer shadow-2xs select-none"
             >
-              {k === "del" ? <Delete className="size-5" /> : k}
+              {k === "del" ? <Delete className="size-5 text-muted-foreground" /> : k}
             </button>
           ))}
         </div>
 
-        <div className="sticky bottom-0 mt-4 grid grid-cols-2 gap-2 border-t bg-card p-5">
+        {/* Bottom Actions with Safe Padding */}
+        <div className="sticky bottom-0 mt-4 grid grid-cols-2 gap-3 border-t border-border/80 bg-card/95 backdrop-blur-md p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]">
           <button
             disabled={!amount}
             onClick={handleWait}
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl border font-semibold hover:bg-secondary disabled:opacity-40 cursor-pointer"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-border bg-card px-3 text-xs font-bold text-foreground transition-all hover:bg-secondary active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            <Clock className="size-4" /> {t("wait24h")}
+            <Clock className="size-4 text-muted-foreground" />
+            <span>{t("wait24h")}</span>
           </button>
           <button
             disabled={!amount}
             onClick={handleAdd}
-            className="min-h-12 rounded-xl bg-primary font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40 cursor-pointer"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-3 text-xs font-bold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            {t("addPurchase")}
+            <span>{t("addPurchase")}</span>
           </button>
         </div>
       </SheetContent>

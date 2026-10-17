@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { LedgerBrandMark, LedgerClarityHeroArt } from "@/components/illustrations/ledger-lines";
+import { SaveLuyLockup } from "@/components/brand/save-luy-lockup";
+import { LedgerClarityHeroArt } from "@/components/illustrations/ledger-lines";
 import { ShieldCheck, Globe } from "lucide-react";
 
 export function LoginView() {
@@ -42,10 +43,7 @@ export function LoginView() {
           href={`/${locale}/today`} 
           className="flex items-center gap-2.5 font-bold text-lg tracking-tight group"
         >
-          <LedgerBrandMark size={28} className="transition-transform duration-200 group-hover:scale-105" />
-          <span>
-            Broke<span className="text-primary">No</span>More
-          </span>
+          <SaveLuyLockup markSize={28} className="group-hover:opacity-90 transition-opacity" />
         </Link>
 
         <div className="flex items-center gap-3">
@@ -136,7 +134,7 @@ export function LoginView() {
 
       {/* Footer */}
       <footer className="container mx-auto max-w-7xl px-6 py-6 text-center text-xs text-muted-foreground/60 border-t border-border/20">
-        <p>© {new Date().getFullYear()} BrokeNoMore · Clarity before you spend</p>
+        <p>© {new Date().getFullYear()} SaveLuy · Clarity before you spend</p>
       </footer>
     </div>
   );

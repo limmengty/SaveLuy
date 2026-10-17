@@ -8,24 +8,27 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRef } from "react";
 import Image from "next/image";
-import { User, Shield, Globe, Languages, Coins, MessageSquare, LogOut, Sun, Moon, Laptop, Camera, Loader2 } from "lucide-react";
+import { User, Shield, Globe, Languages, Coins, MessageSquare, LogOut, Sun, Moon, Laptop, Camera, Loader2, Calendar } from "lucide-react";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseApi } from "@/lib/api/supabase-service";
 import { cn } from "@/lib/utils";
+import { STORAGE_KEYS, removeAllStorageKeys } from "@/lib/storage/migrate-storage";
 
 export function SettingsView() {
   const t = useTranslations("settings");
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { state, setVoice, setCurrency, resetAll } = useWealthEngine();
+  const { state, setVoice, setCurrency, setExchangeRate, resetAll, updatePlan } = useWealthEngine();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [customRateInput, setCustomRateInput] = useState<string>("");
+  const [isEditingCustomRate, setIsEditingCustomRate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Determine current locale from pathname
@@ -109,7 +112,7 @@ export function SettingsView() {
       setUserEmail(null);
       setUserId(null);
       if (typeof window !== "undefined") {
-        localStorage.removeItem("brokenomore.state.v2");
+        removeAllStorageKeys([STORAGE_KEYS.STATE, STORAGE_KEYS.LEGACY_STATE]);
         sessionStorage.clear();
       }
       resetAll();
@@ -261,7 +264,7 @@ export function SettingsView() {
                   key={l.code}
                   href={pathname.replace(`/${currentLocale}`, `/${l.code}`)}
                   className={cn(
-                    "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[72px]",
+                    "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[70px]",
                     currentLocale === l.code
                       ? "border-primary bg-primary/10"
                       : "border-border bg-card hover:bg-secondary"
@@ -282,23 +285,171 @@ export function SettingsView() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { code: "USD", symbol: "$", label: "USD ($)" },
-                { code: "KHR", symbol: "៛", label: "KHR (៛)" },
+                { code: "USD", symbol: "$", label: "USD ($)", desc: "100 cents / 1 USD" },
+                { code: "KHR", symbol: "៛", label: "KHR (៛)", desc: "1 riel / 1 KHR" },
               ].map((c) => (
                 <button
                   key={c.code}
                   onClick={() => handleCurrencyChange(c.code as "USD" | "KHR")}
                   className={cn(
-                    "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[72px]",
+                    "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[70px]",
                     (state.preferences.currency || "USD") === c.code
                       ? "border-primary bg-primary/10"
                       : "border-border bg-card hover:bg-secondary"
                   )}
                 >
                   <span className="block text-sm font-semibold">{c.label}</span>
-                  <span className="text-xs text-muted-foreground mt-0.5">Minor units: 100 cents / 1 {c.code}</span>
+                  <span className="text-xs text-muted-foreground mt-0.5 leading-tight">{c.desc}</span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Khmer Riel Exchange Rate Configuration */}
+          <div className="border-t border-border pt-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">៛</span>
+                <label className="text-sm font-medium text-foreground">{t("exchangeRate")}</label>
+              </div>
+              <span className="text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
+                1 USD = {(state.preferences.khrExchangeRate || 4000).toLocaleString()} ៛
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("exchangeRateDesc")}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+              {[
+                { rate: 4000, label: t("rateMarketStandard"), sub: t("rateMarketLabel") },
+                { rate: 4100, label: t("rateBankStandard"), sub: t("rateBankLabel") },
+              ].map((preset) => {
+                const currentRate = state.preferences.khrExchangeRate || 4000;
+                const isSelected = currentRate === preset.rate && !isEditingCustomRate;
+
+                return (
+                  <button
+                    key={preset.rate}
+                    type="button"
+                    onClick={() => {
+                      setIsEditingCustomRate(false);
+                      setExchangeRate(preset.rate);
+                      toast.success(t("exchangeRateUpdated", { rate: preset.rate.toLocaleString() }));
+                    }}
+                    className={cn(
+                      "flex flex-col justify-center rounded-xl border p-3 text-left transition-colors cursor-pointer min-h-[64px]",
+                      isSelected
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-card hover:bg-secondary"
+                    )}
+                  >
+                    <span className="text-xs font-bold">{preset.label}</span>
+                    <span className="text-[11px] text-muted-foreground mt-0.5">{preset.sub}</span>
+                  </button>
+                );
+              })}
+
+              {/* Custom rate button / input */}
+              {isEditingCustomRate ? (
+                <div className="flex flex-col justify-center rounded-xl border border-primary bg-primary/5 p-2 min-h-[64px]">
+                  <span className="text-[10px] font-semibold text-primary mb-1">{t("customRate")} (៛ / $1)</span>
+                  <div className="flex gap-1.5 items-center">
+                    <input
+                      type="number"
+                      step="10"
+                      min="1000"
+                      max="10000"
+                      value={customRateInput}
+                      onChange={(e) => setCustomRateInput(e.target.value)}
+                      placeholder={t("customRatePlaceholder")}
+                      className="w-full text-xs rounded-lg border border-border bg-background px-2 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const parsed = parseInt(customRateInput, 10);
+                        if (!isNaN(parsed) && parsed >= 1000 && parsed <= 10000) {
+                          setExchangeRate(parsed);
+                          setIsEditingCustomRate(false);
+                          toast.success(t("exchangeRateUpdated", { rate: parsed.toLocaleString() }));
+                        } else {
+                          toast.error("Please enter a valid rate between 1,000 and 10,000");
+                        }
+                      }}
+                      className="text-[11px] font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-md hover:bg-primary/90 cursor-pointer"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomRateInput((state.preferences.khrExchangeRate || 4000).toString());
+                    setIsEditingCustomRate(true);
+                  }}
+                  className={cn(
+                    "flex flex-col justify-center rounded-xl border p-3 text-left transition-colors cursor-pointer min-h-[64px]",
+                    (state.preferences.khrExchangeRate !== 4000 && state.preferences.khrExchangeRate !== 4100)
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card hover:bg-secondary"
+                  )}
+                >
+                  <span className="text-xs font-bold">
+                    {(state.preferences.khrExchangeRate !== 4000 && state.preferences.khrExchangeRate !== 4100 && state.preferences.khrExchangeRate)
+                      ? `${state.preferences.khrExchangeRate.toLocaleString()} ៛ / $1`
+                      : t("customRate")}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground mt-0.5">
+                    {(state.preferences.khrExchangeRate !== 4000 && state.preferences.khrExchangeRate !== 4100)
+                      ? "Custom user rate"
+                      : "Set any rate"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Cycle Anchor Switcher */}
+          <div className="border-t border-border pt-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="size-4 text-muted-foreground" />
+              <label className="text-sm font-medium text-foreground">{t("cycleAnchor")}</label>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("cycleAnchorDesc")}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+              {[
+                { day: 1, label: t("monday"), desc: "Default" },
+                { day: 5, label: t("friday"), desc: "Payday" },
+                { day: 6, label: t("saturday"), desc: "Weekend" },
+                { day: 0, label: t("sunday"), desc: "Rest Day" },
+              ].map((item) => {
+                const currentAnchor = typeof state.plan.cycleAnchorDay === "number" ? state.plan.cycleAnchorDay : 1;
+                const isSelected = currentAnchor === item.day;
+                return (
+                  <button
+                    key={item.day}
+                    type="button"
+                    onClick={() => {
+                      updatePlan({ cycleAnchorDay: item.day });
+                      toast.success(`Pacing cycle anchored to ${item.label}`);
+                    }}
+                    className={cn(
+                      "flex flex-col justify-center rounded-xl border p-3 text-left transition-colors cursor-pointer min-h-[64px]",
+                      isSelected
+                        ? "border-primary bg-primary/10 ring-1 ring-primary/40"
+                        : "border-border bg-card hover:bg-secondary"
+                    )}
+                  >
+                    <span className="block text-sm font-semibold">{item.label}</span>
+                    <span className="text-xs text-muted-foreground mt-0.5">{item.desc}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -310,9 +461,9 @@ export function SettingsView() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: "dark", label: "Dark", icon: Moon, desc: "Obsidian ledger" },
-                { id: "light", label: "Light", icon: Sun, desc: "Paper ledger" },
-                { id: "system", label: "System", icon: Laptop, desc: "Device match" },
+                { id: "dark", label: "Dark", icon: Moon, desc: "Obsidian" },
+                { id: "light", label: "Light", icon: Sun, desc: "Paper" },
+                { id: "system", label: "System", icon: Laptop, desc: "Auto" },
               ].map((m) => {
                 const Icon = m.icon;
                 const isSelected = theme === m.id;
@@ -324,17 +475,17 @@ export function SettingsView() {
                       toast.success(`Theme switched to ${m.label}`);
                     }}
                     className={cn(
-                      "rounded-xl border p-3 text-left transition-colors cursor-pointer",
+                      "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[70px]",
                       isSelected
                         ? "border-primary bg-primary/10"
                         : "border-border bg-card hover:bg-secondary"
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className="size-4 text-primary" />
-                      <span className="text-sm font-semibold">{m.label}</span>
+                      <Icon className="size-4 text-primary shrink-0" />
+                      <span className="text-sm font-semibold truncate">{m.label}</span>
                     </div>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">{m.desc}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground truncate">{m.desc}</span>
                   </button>
                 );
               })}
@@ -407,7 +558,7 @@ export function SettingsView() {
             <button
               onClick={() => {
                 if (typeof window !== "undefined") {
-                  localStorage.removeItem("brokenomore.state.v2");
+                  removeAllStorageKeys([STORAGE_KEYS.STATE, STORAGE_KEYS.LEGACY_STATE]);
                   sessionStorage.clear();
                   window.location.reload();
                 }

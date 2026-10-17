@@ -16,6 +16,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface EmergencyUnlockModalProps {
   isOpen: boolean;
@@ -29,15 +31,26 @@ export function EmergencyUnlockModal({
   maxAmountCents,
 }: EmergencyUnlockModalProps) {
   const t = useTranslations("emergency");
-  const { unlockEmergencyMoney } = useWealthEngine();
+  const { unlockEmergencyMoney, state } = useWealthEngine();
+  const currency = state.preferences.currency || "USD";
+  const exchangeRate = state.preferences.khrExchangeRate || 4000;
+  const isKhr = currency === "KHR";
 
   const emergencySchema = z.object({
     amount: z
       .number()
       .positive(t("invalidAmount"))
-      .refine((val) => Math.round(val * 100) <= maxAmountCents, {
-        message: t("amountExceeds"),
-      }),
+      .refine(
+        (val) => {
+          const cents = isKhr
+            ? Math.round((val / exchangeRate) * 100)
+            : Math.round(val * 100);
+          return cents <= maxAmountCents;
+        },
+        {
+          message: t("amountExceeds"),
+        }
+      ),
     reason: z
       .string()
       .min(3, t("reasonRequired"))
@@ -46,21 +59,28 @@ export function EmergencyUnlockModal({
 
   type EmergencyFormData = z.infer<typeof emergencySchema>;
 
+  const defaultInputAmount = isKhr
+    ? Math.min(200000, Math.max(1000, Math.round((maxAmountCents / 100) * exchangeRate)))
+    : Math.min(50, Math.max(1, Math.round(maxAmountCents / 100)));
+
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<EmergencyFormData>({
     resolver: zodResolver(emergencySchema),
+    mode: "onChange",
     defaultValues: {
-      amount: Math.min(50, Math.round(maxAmountCents / 100)),
+      amount: defaultInputAmount,
       reason: "",
     },
   });
 
   const onSubmit = async (data: EmergencyFormData) => {
-    const cents = Math.round(data.amount * 100);
+    const cents = isKhr
+      ? Math.round((data.amount / exchangeRate) * 100)
+      : Math.round(data.amount * 100);
     try {
       await unlockEmergencyMoney(cents, data.reason.trim());
       toast.success(t("successToast", { amount: formatMoney(cents) }));
@@ -86,43 +106,48 @@ export function EmergencyUnlockModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">
+            <label className="text-xs font-semibold text-muted-foreground block">
               {t("amountLabel", { max: formatMoney(maxAmountCents) })}
             </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-3 text-muted-foreground font-semibold">$</span>
-              <Input
-                type="number"
-                step="any"
-                {...register("amount", { valueAsNumber: true })}
-                className="pl-8 money font-bold text-foreground"
-              />
-            </div>
+            <Input
+              type="number"
+              step={isKhr ? "100" : "any"}
+              inputMode={isKhr ? "numeric" : "decimal"}
+              {...register("amount", { valueAsNumber: true })}
+              startAdornment={isKhr ? "៛" : "$"}
+              placeholder={isKhr ? "0" : "0.00"}
+              className={cn(
+                "money font-bold text-foreground",
+                errors.amount && "border-destructive focus-visible:ring-destructive"
+              )}
+            />
             {errors.amount && (
-              <p className="text-xs font-medium text-destructive">{errors.amount.message}</p>
+              <p className="text-xs font-medium text-destructive mt-1">{errors.amount.message}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">
+            <label className="text-xs font-semibold text-muted-foreground block">
               {t("reasonLabel")}
             </label>
-            <textarea
+            <Textarea
               rows={2}
               {...register("reason")}
               placeholder={t("reasonPlaceholder")}
-              className="w-full rounded-xl border border-input bg-card p-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className={cn(
+                errors.reason && "border-destructive focus-visible:ring-destructive"
+              )}
             />
             {errors.reason && (
-              <p className="text-xs font-medium text-destructive">{errors.reason.message}</p>
+              <p className="text-xs font-medium text-destructive mt-1">{errors.reason.message}</p>
             )}
           </div>
 
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 h-11 rounded-xl bg-destructive px-4 text-xs font-semibold text-destructive-foreground hover:opacity-90 disabled:opacity-50 cursor-pointer"
+              disabled={isSubmitting || !isValid}
+              className="flex-1 h-11 rounded-xl bg-destructive px-4 text-xs font-semibold text-destructive-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
             >
               {isSubmitting ? "Unlocking..." : t("confirmUnlock")}
             </button>

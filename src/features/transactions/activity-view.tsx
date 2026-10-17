@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQueryState, parseAsString } from "nuqs";
-import { RotateCcw, Filter } from "lucide-react";
+import { RotateCcw, Filter, Coffee, Utensils, Bike, Heart, ShoppingBag, Receipt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { LedgerEmptyActivity } from "@/components/illustrations/ledger-lines";
@@ -18,6 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+
+function getCategoryIcon(label: string, envelope: "essentials" | "fun") {
+  const l = label.toLowerCase();
+  if (l.includes("coffee") || l.includes("កាហ្វេ")) return Coffee;
+  if (l.includes("meal") || l.includes("food") || l.includes("បាយ") || l.includes("អាហារ")) return Utensils;
+  if (l.includes("transport") || l.includes("passapp") || l.includes("grab") || l.includes("ធ្វើដំណើរ")) return Bike;
+  if (l.includes("grocer") || l.includes("ផ្សារ")) return ShoppingBag;
+  if (envelope === "fun") return Heart;
+  return Receipt;
+}
 
 export function ActivityView() {
   const t = useTranslations("activity");
@@ -57,8 +67,8 @@ export function ActivityView() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      {/* Modern Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+      {/* Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
         <div className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Filter className="size-3.5" />
@@ -145,49 +155,100 @@ export function ActivityView() {
                 <span className="money">{formatMoney(dayTotal)}</span>
               </div>
 
-              <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-                {txs.map((txItem) => (
-                  <li
-                    key={txItem.id}
-                    className={cn(
-                      "item-enter flex items-center gap-3 px-4 py-3 transition-colors hover:bg-secondary/40",
-                      txItem.reversed && "opacity-50"
-                    )}
-                  >
-                    <div
-                      onClick={() => !txItem.reversed && setSelectedTx(txItem)}
-                      className={cn("min-w-0 flex-1", !txItem.reversed && "cursor-pointer")}
+              <ul className="divide-y divide-border/70 rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+                {txs.map((txItem) => {
+                  const Icon = getCategoryIcon(txItem.label, txItem.envelope);
+                  const isFun = txItem.envelope === "fun";
+
+                  return (
+                    <li
+                      key={txItem.id}
+                      className={cn(
+                        "item-enter flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-secondary/40",
+                        txItem.reversed && "bg-secondary/20 opacity-60"
+                      )}
                     >
-                      <p className={cn("text-sm font-semibold", txItem.reversed && "line-through")}>
-                        {txItem.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {txItem.envelope === "fun" ? tCommon("funMoney") : tCommon("essentials")} ·{" "}
-                        {new Date(txItem.createdAt).toLocaleTimeString(dateLocale, {
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                        {txItem.reversed && ` · ${t("undone")}`}
-                      </p>
-                    </div>
-
-                    <span className="money text-sm font-semibold">−{formatMoney(txItem.amount)}</span>
-
-                    {!txItem.reversed && (
-                      <button
-                        aria-label={`${t("undo")} ${txItem.label}`}
-                        title={t("undo")}
-                        onClick={() => {
-                          reverseTransaction(txItem.id);
-                          toast(t("undoToast", { label: txItem.label }));
-                        }}
-                        className="grid size-11 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary cursor-pointer"
+                      {/* Category Icon Badge */}
+                      <div
+                        className={cn(
+                          "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-transform",
+                          txItem.reversed
+                            ? "border-border bg-secondary/50 text-muted-foreground"
+                            : isFun
+                              ? "border-warning/30 bg-warning/10 text-warning"
+                              : "border-primary/30 bg-primary/10 text-primary"
+                        )}
                       >
-                        <RotateCcw className="size-4" />
-                      </button>
-                    )}
-                  </li>
-                ))}
+                        {txItem.reversed ? (
+                          <Undo2 className="size-4.5" />
+                        ) : (
+                          <Icon className="size-4.5" />
+                        )}
+                      </div>
+
+                      {/* Title & Metadata */}
+                      <div
+                        onClick={() => !txItem.reversed && setSelectedTx(txItem)}
+                        className={cn("min-w-0 flex-1", !txItem.reversed && "cursor-pointer")}
+                      >
+                        <div className="flex items-center gap-2">
+                          <p className={cn("text-sm font-semibold truncate", txItem.reversed && "line-through text-muted-foreground")}>
+                            {txItem.label}
+                          </p>
+                          {txItem.reversed && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+                              {t("undone")}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                          <span
+                            className={cn(
+                              "inline-block size-1.5 rounded-full",
+                              isFun ? "bg-warning" : "bg-primary"
+                            )}
+                          />
+                          <span>
+                            {isFun ? tCommon("funMoney") : tCommon("essentials")}
+                          </span>
+                          <span>·</span>
+                          <span>
+                            {new Date(txItem.createdAt).toLocaleTimeString(dateLocale, {
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Monetary Amount */}
+                      <div className="text-right">
+                        <span className={cn(
+                          "money text-sm font-bold tracking-tight block",
+                          txItem.reversed ? "line-through text-muted-foreground/60" : "text-foreground"
+                        )}>
+                          −{formatMoney(txItem.amount)}
+                        </span>
+                      </div>
+
+                      {/* Undo Action */}
+                      {!txItem.reversed && (
+                        <button
+                          aria-label={`${t("undo")} ${txItem.label}`}
+                          title={t("undo")}
+                          onClick={() => {
+                            reverseTransaction(txItem.id);
+                            toast(t("undoToast", { label: txItem.label }));
+                          }}
+                          className="grid size-9 place-items-center rounded-xl border border-transparent text-muted-foreground/80 hover:text-foreground hover:bg-secondary hover:border-border transition-all cursor-pointer active:scale-95"
+                        >
+                          <RotateCcw className="size-4" />
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );

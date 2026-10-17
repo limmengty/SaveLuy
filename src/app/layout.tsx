@@ -3,17 +3,17 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata = {
-  title: "BrokeNoMore — What can I spend today?",
+  title: "SaveLuy — Know what you can safely spend today.",
   description: "A calm daily spending decision system with instant capture and purchase impact checking.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "BrokeNoMore",
+    title: "SaveLuy",
   },
   icons: {
     icon: "/icon.svg",
-    apple: "/icon.svg",
+    apple: "/apple-icon",
   },
 };
 

@@ -8,7 +8,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   return {
-    title: locale === "km-KH" ? "BrokeNoMore — ថ្ងៃនេះ" : "BrokeNoMore — Today",
+    title: locale === "km-KH" ? "SaveLuy — ថ្ងៃនេះ" : "SaveLuy — Today",
   };
 }
 

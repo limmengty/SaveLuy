@@ -4,10 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import { ArrowLeft, Check, Sparkles, HelpCircle } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, HelpCircle } from "lucide-react";
 import { OnboardingTemplateSchema, type OnboardingTemplateInput } from "@/lib/validation/schemas";
 import { formatMoney } from "@/lib/money";
 import { generateTemplatesForIncome } from "./template-generator";
+import { STORAGE_KEYS, getMigratedStorageItem } from "@/lib/storage/migrate-storage";
 
 interface TemplateStepProps {
   locale: string;
@@ -20,7 +21,9 @@ export function TemplateStep({ locale }: TemplateStepProps) {
   const incomeCents = useMemo(() => {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("brokenomore.draft.income") || sessionStorage.getItem("onboarding_income");
+        const stored =
+          getMigratedStorageItem(STORAGE_KEYS.DRAFT_INCOME, STORAGE_KEYS.LEGACY_DRAFT_INCOME) ||
+          sessionStorage.getItem("onboarding_income");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed.monthlyIncome) return Number(parsed.monthlyIncome);
@@ -54,7 +57,7 @@ export function TemplateStep({ locale }: TemplateStepProps) {
 
   const onSubmit = (data: OnboardingTemplateInput) => {
     sessionStorage.setItem("onboarding_template", JSON.stringify(data));
-    localStorage.setItem("brokenomore.draft.template", JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEYS.DRAFT_TEMPLATE, JSON.stringify(data));
     router.push(`/${locale}/onboarding/review`);
   };
 
@@ -122,7 +125,7 @@ export function TemplateStep({ locale }: TemplateStepProps) {
                             <span className="text-base font-bold text-foreground">{tpl.title}</span>
                             {tpl.badge && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary">
-                                <Sparkles className="size-3" />
+                                <CheckCircle2 className="size-3" />
                                 {tpl.badge}
                               </span>
                             )}

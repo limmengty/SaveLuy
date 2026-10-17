@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("BrokeNoMore Authentication & Guard Tests", () => {
+test.describe("SaveLuy Authentication & Guard Tests", () => {
   test("Unauthenticated user accessing protected route is redirected to /login with next param", async ({ page }) => {
     // Attempting to visit /today without auth session
     await page.goto("/en-KH/today");

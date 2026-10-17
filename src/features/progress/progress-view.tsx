@@ -5,19 +5,46 @@ import { Flame, ShieldCheck, Trophy, Award, CalendarCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import { formatMoney } from "@/lib/money";
+import { WeeklyPaceChart } from "@/components/charts/weekly-pace-chart";
+import { SpendingBreakdownChart } from "@/components/charts/spending-breakdown-chart";
+import { ProtectedMoneyChart } from "@/components/charts/protected-money-chart";
+import { aggregateWeeklyPace, aggregateSpendingBreakdown } from "@/features/analytics/utils/chart-aggregations";
+import type { SpendingPeriod } from "@/features/analytics/types";
 
 export function ProgressView() {
   const t = useTranslations("progress");
   const { state, computed } = useWealthEngine();
   const [optedIn, setOptedIn] = useState(false);
+  const [period, setPeriod] = useState<SpendingPeriod>("this-week");
 
   // Calculate current streak based on days under budget
   const streakDays = computed.status === "on" ? 4 : 2;
   const totalSaved = state.futureAllocated + state.plan.futureFundMonthly;
 
+  const weeklyPaceData = aggregateWeeklyPace(state.plan, state.transactions, new Date());
+  const spendingBreakdownData = aggregateSpendingBreakdown(
+    state.transactions,
+    period,
+    state.plan.cycleAnchorDay ?? 1,
+    new Date()
+  );
+
   return (
     <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_350px]">
       <div className="space-y-7">
+        {/* Weekly Pace Detailed Chart */}
+        <WeeklyPaceChart data={weeklyPaceData} />
+
+        {/* Flexible Spending Breakdown Chart */}
+        <SpendingBreakdownChart
+          data={spendingBreakdownData}
+          period={period}
+          onPeriodChange={setPeriod}
+        />
+
+        {/* Protected Money Growth Chart */}
+        <ProtectedMoneyChart plan={state.plan} futureAllocated={state.futureAllocated} />
+
         {/* Discipline & Streaks Hero */}
         <div className="rounded-2xl border border-border bg-card p-5 lg:p-7 shadow-sm">
           <p className="eyebrow">{t("disciplineMomentum")}</p>

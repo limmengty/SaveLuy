@@ -1,8 +1,15 @@
 "use client";
  
- import { useState } from "react";
- import { CheckCircle, Filter } from "lucide-react";
- import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { CheckCircle, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface QueueItem {
   id: string;
@@ -92,16 +99,17 @@ export function OverviewQueue() {
 
         <div className="flex items-center gap-2">
           <Filter className="size-4 text-muted-foreground" />
-          <select
-            value={filterSeverity}
-            onChange={(e) => setFilterSeverity(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-border bg-card text-xs font-semibold text-foreground focus:outline-none"
-          >
-            <option value="all">All Severities</option>
-            <option value="critical">Critical Only</option>
-            <option value="high">High Only</option>
-            <option value="medium">Medium Only</option>
-          </select>
+          <Select value={filterSeverity} onValueChange={setFilterSeverity}>
+            <SelectTrigger className="h-10 min-w-[140px] text-xs font-semibold">
+              <SelectValue placeholder="All Severities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Severities</SelectItem>
+              <SelectItem value="critical">Critical Only</SelectItem>
+              <SelectItem value="high">High Only</SelectItem>
+              <SelectItem value="medium">Medium Only</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

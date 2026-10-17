@@ -1,5 +1,5 @@
 /**
- * BrokeNoMore Pure Integer Minor Units Money Engine
+ * SaveLuy Pure Integer Minor Units Money Engine
  *
  * All monetary amounts across the system (database, domain state, calculation engine)
  * are stored as non-negative integers in minor units:
@@ -45,7 +45,10 @@ export const CURRENCY_REGISTRY: Record<CurrencyCode, CurrencyMetadata> = {
  */
 export const WEEKS_PER_MONTH = 52 / 12; // 4.333333333333334
 
+export const DEFAULT_KHR_EXCHANGE_RATE = 4000; // 4000 KHR = $1 USD (100 cents)
+
 let activeGlobalCurrency: CurrencyCode = "USD";
+let activeKhrExchangeRate: number = DEFAULT_KHR_EXCHANGE_RATE;
 
 export function setActiveCurrency(currency: CurrencyCode) {
   activeGlobalCurrency = currency;
@@ -55,14 +58,24 @@ export function getActiveCurrency(): CurrencyCode {
   return activeGlobalCurrency;
 }
 
+export function setActiveExchangeRate(rate: number) {
+  if (rate > 0) activeKhrExchangeRate = rate;
+}
+
+export function getActiveExchangeRate(): number {
+  return activeKhrExchangeRate;
+}
+
 /**
- * Format integer minor units into a localized currency string.
- * Strictly avoids IEEE 754 float drift by using integer division and modulo.
+ * Format integer minor units (stored in USD cents) into a localized currency string.
+ * When currency is KHR, converts USD cents to Cambodian Riels using the exchange rate:
+ * riels = round((cents / 100) * exchangeRate).
  */
 export function formatMoney(
   minorUnits: number,
   locale?: string,
-  currency?: CurrencyCode | string
+  currency?: CurrencyCode | string,
+  exchangeRate: number = activeKhrExchangeRate
 ): string {
   if (!Number.isFinite(minorUnits)) return "$0.00";
 
@@ -79,8 +92,9 @@ export function formatMoney(
   const absUnits = Math.round(Math.abs(minorUnits));
 
   if (targetCurrency === "KHR") {
-    // KHR uses 0 decimals
-    const formatted = absUnits.toLocaleString(targetLocale, {
+    // Convert USD cents to Cambodian Riels: (cents / 100) * exchangeRate
+    const riels = Math.round((absUnits / 100) * exchangeRate);
+    const formatted = riels.toLocaleString(targetLocale, {
       style: "currency",
       currency: "KHR",
       maximumFractionDigits: 0,
@@ -101,20 +115,14 @@ export function formatMoney(
 }
 
 /**
- * Parses user text input into exact integer minor units (cents)
- * WITHOUT using parseFloat(val) * 100.
- *
- * Examples:
- * "200" -> 20000 cents
- * "200.5" -> 20050 cents
- * "200.55" -> 20055 cents
- * "0.01" -> 1 cent
- * "1,500.00" -> 150000 cents
- * "$200" -> 20000 cents
+ * Parses user text input into canonical integer cents (USD).
+ * If user enters input in KHR (e.g. 20,000 Riels), converts back to USD cents:
+ * cents = round((riels / exchangeRate) * 100)
  */
 export function parseMoneyInputToCents(
   val: string,
-  currency: CurrencyCode = activeGlobalCurrency
+  currency: CurrencyCode = activeGlobalCurrency,
+  exchangeRate: number = activeKhrExchangeRate
 ): number {
   if (!val || typeof val !== "string") return 0;
 
@@ -123,10 +131,14 @@ export function parseMoneyInputToCents(
   if (!cleaned) return 0;
 
   if (currency === "KHR") {
-    // KHR has no fractional cents in common usage; parse integer directly
+    // User typed Cambodian Riels directly (e.g. "80000" or "80,000")
     const integerPart = cleaned.split(".")[0];
-    const parsed = parseInt(integerPart, 10);
-    return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+    const riels = parseInt(integerPart, 10);
+    if (!Number.isFinite(riels) || riels <= 0) return 0;
+    // Convert Riels to USD cents
+    const rate = exchangeRate > 0 ? exchangeRate : DEFAULT_KHR_EXCHANGE_RATE;
+    const cents = Math.round((riels / rate) * 100);
+    return Math.min(10_000_000_000, Math.max(0, cents));
   }
 
   // USD parsing: split on decimal point
@@ -146,17 +158,21 @@ export function parseMoneyInputToCents(
 }
 
 /**
- * Converts stored minor units (cents) to a clean string suitable for an HTML input value.
- * Example: 20000 cents -> "200.00"
+ * Converts stored minor units (USD cents) to a clean string suitable for an HTML input value.
+ * In USD: 2076 cents -> "20.76"
+ * In KHR: 2076 cents -> (2076 / 100) * 4000 = 83040 -> "83040"
  */
 export function centsToInputValue(
   cents: number,
-  currency: CurrencyCode = activeGlobalCurrency
+  currency: CurrencyCode = activeGlobalCurrency,
+  exchangeRate: number = activeKhrExchangeRate
 ): string {
   if (!Number.isFinite(cents) || cents <= 0) return "";
 
   if (currency === "KHR") {
-    return Math.round(cents).toString();
+    const rate = exchangeRate > 0 ? exchangeRate : DEFAULT_KHR_EXCHANGE_RATE;
+    const riels = Math.round((cents / 100) * rate);
+    return riels.toString();
   }
 
   const absUnits = Math.round(cents);

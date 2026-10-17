@@ -128,23 +128,23 @@ export function TransactionDetailModal({
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">{t("description")}</label>
+              <label className="text-xs font-semibold text-muted-foreground block">{t("description")}</label>
               <Input
                 {...register("label")}
-                className="h-11"
+                placeholder="e.g. Lunch with team or Groceries"
               />
               {errors.label && (
-                <p className="text-xs text-destructive">{errors.label.message}</p>
+                <p className="text-xs text-destructive mt-1">{errors.label.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">{t("envelope")}</label>
+              <label className="text-xs font-semibold text-muted-foreground block">{t("envelope")}</label>
               <Select
                 defaultValue={transaction.envelope}
                 onValueChange={(val: "essentials" | "fun") => setValue("envelope", val, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-11 rounded-xl">
+                <SelectTrigger>
                   <SelectValue placeholder={t("envelope")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,7 +153,7 @@ export function TransactionDetailModal({
                 </SelectContent>
               </Select>
               {errors.envelope && (
-                <p className="text-xs text-destructive">{errors.envelope.message}</p>
+                <p className="text-xs text-destructive mt-1">{errors.envelope.message}</p>
               )}
             </div>
 

@@ -20,5 +20,6 @@ export interface UserPreferences {
   voice: "calm" | "straight";
   locale: "en-KH" | "km-KH";
   currency: "USD" | "KHR";
+  khrExchangeRate?: number; // e.g. 4000 (meaning 4000 KHR = $1 USD)
 }
 

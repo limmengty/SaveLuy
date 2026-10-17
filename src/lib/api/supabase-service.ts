@@ -136,14 +136,80 @@ export const supabaseApi = {
       .eq("status", "waiting")
       .order("created_at", { ascending: false });
 
-    // Fetch Future fund allocations from weekly reviews
+    // Fetch Future fund allocations and latest review from weekly reviews
     const { data: reviewRows } = await supabase
       .from("weekly_reviews")
-      .select("remainder_cents")
+      .select("remainder_cents, action, created_at")
       .eq("user_id", user.id)
-      .eq("action", "future");
+      .order("created_at", { ascending: false });
 
-    const futureAllocated = (reviewRows || []).reduce((acc, r) => acc + (r.remainder_cents || 0), 0);
+    const futureAllocated = (reviewRows || [])
+      .filter((r) => r.action === "future")
+      .reduce((acc, r) => acc + (r.remainder_cents || 0), 0);
+
+    const latestReview = reviewRows && reviewRows.length > 0 ? reviewRows[0] : null;
+
+    // Fetch active emergency unlocks for the current cycle
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dow = (d.getDay() + 6) % 7; // Monday = 0
+    d.setDate(d.getDate() - dow);
+    const currentWeekStartIso = d.toISOString();
+
+    const { data: emergencyRows } = await supabase
+      .from("audit_events")
+      .select("id, event_type, payload, created_at")
+      .eq("user_id", user.id)
+      .in("event_type", ["emergency_unlock", "emergency_revert", "emergency_clear_all"])
+      .gte("created_at", currentWeekStartIso)
+      .order("created_at", { ascending: true }); // chronological order
+
+    let emergencyReliefCents = 0;
+    let emergencyUnlockedTotalCents = 0;
+    let lastEmergencyReason: string | undefined;
+    let lastEmergencyDate: string | undefined;
+    const emergencyHistory: import("../wealth-engine/engine").EmergencyUnlockRecord[] = [];
+
+    if (emergencyRows && emergencyRows.length > 0) {
+      for (const row of emergencyRows) {
+        const payload = (row.payload || {}) as Record<string, unknown>;
+
+        if (row.event_type === "emergency_clear_all") {
+          // Clear all active emergency relief
+          emergencyReliefCents = 0;
+          emergencyUnlockedTotalCents = 0;
+          lastEmergencyReason = undefined;
+          lastEmergencyDate = undefined;
+          emergencyHistory.length = 0;
+        } else if (row.event_type === "emergency_revert") {
+          // Remove reverted record from active relief
+          const revertedRecordId = typeof payload.recordId === "string" ? payload.recordId : undefined;
+          const revertedAmount = typeof payload.amountCents === "number" ? payload.amountCents : 0;
+          emergencyReliefCents = Math.max(0, emergencyReliefCents - revertedAmount);
+          emergencyUnlockedTotalCents = Math.max(0, emergencyUnlockedTotalCents - revertedAmount);
+
+          if (revertedRecordId) {
+            const idx = emergencyHistory.findIndex((r) => r.id === revertedRecordId);
+            if (idx !== -1) emergencyHistory.splice(idx, 1);
+          } else if (emergencyHistory.length > 0) {
+            emergencyHistory.pop();
+          }
+        } else if (row.event_type === "emergency_unlock") {
+          const amount = typeof payload.amountCents === "number" ? payload.amountCents : 0;
+          const reason = typeof payload.reason === "string" ? payload.reason : "Emergency access";
+          emergencyReliefCents += amount;
+          emergencyUnlockedTotalCents += amount;
+          lastEmergencyReason = reason;
+          lastEmergencyDate = row.created_at;
+          emergencyHistory.unshift({
+            id: row.id ?? `emg-${row.created_at}`,
+            amountCents: amount,
+            reason,
+            createdAt: row.created_at,
+          });
+        }
+      }
+    }
 
     const plan: Plan = planRow
       ? {
@@ -153,6 +219,21 @@ export const supabaseApi = {
           futureFundMonthly: planRow.future_fund_monthly_cents,
           monthlyFlexibleIncome: planRow.monthly_flexible_income_cents,
           monthlyWorkHours: planRow.monthly_work_hours,
+          ...(latestReview && new Date(latestReview.created_at) >= new Date(currentWeekStartIso)
+            ? {
+                lastReviewedWeekStart: currentWeekStartIso,
+                lastReviewAction: latestReview.action as "future" | "carry" | "leave",
+              }
+            : {}),
+          ...(emergencyReliefCents > 0
+            ? {
+                emergencyReliefCents,
+                emergencyUnlockedTotalCents,
+                lastEmergencyReason,
+                lastEmergencyDate,
+                emergencyHistory,
+              }
+            : {}),
         }
       : {
           essentialsLimit: 830,
@@ -161,12 +242,19 @@ export const supabaseApi = {
           futureFundMonthly: 3000,
           monthlyFlexibleIncome: 20000,
           monthlyWorkHours: 160,
+          ...(latestReview && new Date(latestReview.created_at) >= new Date(currentWeekStartIso)
+            ? {
+                lastReviewedWeekStart: currentWeekStartIso,
+                lastReviewAction: latestReview.action as "future" | "carry" | "leave",
+              }
+            : {}),
         };
 
     const preferences: UserPreferences = {
       voice: (prefRow?.voice as "calm" | "straight") || "calm",
       locale: (prefRow?.locale as "en-KH" | "km-KH") || "en-KH",
       currency: (prefRow?.currency as "USD" | "KHR") || "USD",
+      khrExchangeRate: prefRow?.khr_exchange_rate || 4000,
     };
 
     const transactions: Transaction[] = (txRows || []).map((t) => ({

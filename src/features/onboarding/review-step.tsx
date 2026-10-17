@@ -2,13 +2,15 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Lock, AlertTriangle, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Lock, AlertTriangle, CheckCircle2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
 import type { Plan } from "@/lib/wealth-engine/engine";
 import { formatMoney, parseMoneyInputToCents, centsToInputValue, evaluatePlanFeasibility } from "@/lib/money";
 import { generateTemplatesForIncome } from "./template-generator";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { STORAGE_KEYS, getMigratedStorageItem, removeAllStorageKeys } from "@/lib/storage/migrate-storage";
 
 interface ReviewStepProps {
   locale: string;
@@ -22,7 +24,9 @@ export function ReviewStep({ locale }: ReviewStepProps) {
   const incomeCents = useMemo(() => {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("brokenomore.draft.income") || sessionStorage.getItem("onboarding_income");
+        const stored =
+          getMigratedStorageItem(STORAGE_KEYS.DRAFT_INCOME, STORAGE_KEYS.LEGACY_DRAFT_INCOME) ||
+          sessionStorage.getItem("onboarding_income");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed.monthlyIncome) return Number(parsed.monthlyIncome);
@@ -38,7 +42,9 @@ export function ReviewStep({ locale }: ReviewStepProps) {
   const templateId = useMemo(() => {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("brokenomore.draft.template") || sessionStorage.getItem("onboarding_template");
+        const stored =
+          getMigratedStorageItem(STORAGE_KEYS.DRAFT_TEMPLATE, STORAGE_KEYS.LEGACY_DRAFT_TEMPLATE) ||
+          sessionStorage.getItem("onboarding_template");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed.templateId) return parsed.templateId;
@@ -97,9 +103,13 @@ export function ReviewStep({ locale }: ReviewStepProps) {
       console.error("Failed to sync onboarding to database:", err);
     }
 
-    toast("Plan activated! Welcome to BrokeNoMore.");
-    localStorage.removeItem("brokenomore.draft.income");
-    localStorage.removeItem("brokenomore.draft.template");
+    toast("Plan activated! Welcome to SaveLuy.");
+    removeAllStorageKeys([
+      STORAGE_KEYS.DRAFT_INCOME,
+      STORAGE_KEYS.LEGACY_DRAFT_INCOME,
+      STORAGE_KEYS.DRAFT_TEMPLATE,
+      STORAGE_KEYS.LEGACY_DRAFT_TEMPLATE,
+    ]);
     sessionStorage.removeItem("onboarding_income");
     sessionStorage.removeItem("onboarding_template");
     router.replace(`/${locale}/today`);
@@ -195,69 +205,65 @@ export function ReviewStep({ locale }: ReviewStepProps) {
           </div>
 
           {/* Editable Envelopes Section */}
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-4.5">
+          <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Weekly Flexible Envelopes</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5 rounded-xl bg-secondary/50 p-3">
-                <span className="text-xs font-medium text-muted-foreground block">Essentials /wk</span>
-                <div className="flex items-center">
-                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={centsToInputValue(essentialsWeekly)}
-                    onChange={(e) => setEssentialsWeekly(parseMoneyInputToCents(e.target.value))}
-                    className="money w-full bg-transparent text-base font-bold text-foreground outline-none"
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-muted-foreground block">Essentials /wk</span>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  defaultValue={centsToInputValue(essentialsWeekly)}
+                  onChange={(e) => setEssentialsWeekly(parseMoneyInputToCents(e.target.value))}
+                  className="money font-bold"
+                  placeholder="0.00"
+                  startAdornment="$"
+                />
               </div>
-              <div className="space-y-1.5 rounded-xl bg-secondary/50 p-3">
-                <span className="text-xs font-medium text-muted-foreground block">Fun Money /wk</span>
-                <div className="flex items-center">
-                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={centsToInputValue(funWeekly)}
-                    onChange={(e) => setFunWeekly(parseMoneyInputToCents(e.target.value))}
-                    className="money w-full bg-transparent text-base font-bold text-foreground outline-none"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-muted-foreground block">Fun Money /wk</span>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  defaultValue={centsToInputValue(funWeekly)}
+                  onChange={(e) => setFunWeekly(parseMoneyInputToCents(e.target.value))}
+                  className="money font-bold"
+                  placeholder="0.00"
+                  startAdornment="$"
+                />
               </div>
             </div>
 
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-2">Protected Monthly Money</h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
-                <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Lock className="size-4 text-muted-foreground" /> Home & fixed /mo
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-3">Protected Monthly Money</h3>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <Lock className="size-3.5 text-muted-foreground" /> Home & fixed /mo
                 </span>
-                <div className="flex items-center max-w-[120px] justify-end">
-                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={centsToInputValue(homeFixedMonthly)}
-                    onChange={(e) => setHomeFixedMonthly(parseMoneyInputToCents(e.target.value))}
-                    className="money w-full bg-transparent text-sm font-bold text-foreground outline-none text-right"
-                  />
-                </div>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  defaultValue={centsToInputValue(homeFixedMonthly)}
+                  onChange={(e) => setHomeFixedMonthly(parseMoneyInputToCents(e.target.value))}
+                  className="money font-bold"
+                  placeholder="0.00"
+                  startAdornment="$"
+                />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-secondary/50 p-3">
-                <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Lock className="size-4 text-muted-foreground" /> Future fund /mo
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <Lock className="size-3.5 text-muted-foreground" /> Future fund /mo
                 </span>
-                <div className="flex items-center max-w-[120px] justify-end">
-                  <span className="text-sm font-bold text-muted-foreground mr-1">$</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={centsToInputValue(futureFundMonthly)}
-                    onChange={(e) => setFutureFundMonthly(parseMoneyInputToCents(e.target.value))}
-                    className="money w-full bg-transparent text-sm font-bold text-foreground outline-none text-right"
-                  />
-                </div>
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  defaultValue={centsToInputValue(futureFundMonthly)}
+                  onChange={(e) => setFutureFundMonthly(parseMoneyInputToCents(e.target.value))}
+                  className="money font-bold"
+                  placeholder="0.00"
+                  startAdornment="$"
+                />
               </div>
             </div>
           </div>

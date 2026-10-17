@@ -9,7 +9,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   return {
-    title: locale === "km-KH" ? "BrokeNoMore — ចូលគណនី" : "BrokeNoMore — Sign In",
+    title: locale === "km-KH" ? "SaveLuy — ចូលគណនី" : "SaveLuy — Sign In",
   };
 }
 

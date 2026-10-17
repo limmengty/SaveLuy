@@ -25,6 +25,10 @@ describe("Money Module — Minor Units & Financial Invariants", () => {
     expect(formatMoney(1, "en-US", "USD")).toBe("$0.01");
     expect(formatMoney(1999, "en-US", "USD")).toBe("$19.99");
     expect(formatMoney(-500, "en-US", "USD")).toBe("−$5.00");
+    // KHR conversion with default 4000 rate: $1.00 (100 cents) = 4,000 Riels
+    expect(formatMoney(100, "en-KH", "KHR", 4000)).toContain("4,000");
+    // KHR conversion with 4100 rate: $20.00 (2000 cents) = 82,000 Riels
+    expect(formatMoney(2000, "en-KH", "KHR", 4100)).toContain("82,000");
   });
 
   it("converts integer cents back to clean HTML input values", () => {
@@ -32,6 +36,19 @@ describe("Money Module — Minor Units & Financial Invariants", () => {
     expect(centsToInputValue(1999)).toBe("19.99");
     expect(centsToInputValue(50)).toBe("0.50");
     expect(centsToInputValue(0)).toBe("");
+    // KHR input values: $20.76 (2076 cents) at 4000 = 83040 Riels
+    expect(centsToInputValue(2076, "KHR", 4000)).toBe("83040");
+    // KHR input values: $1.00 (100 cents) at 4000 = 4000 Riels
+    expect(centsToInputValue(100, "KHR", 4000)).toBe("4000");
+  });
+
+  it("parses user input strings in KHR back to canonical USD cents", () => {
+    // 4,000 Riels at 4000 rate = 100 cents ($1.00)
+    expect(parseMoneyInputToCents("4000", "KHR", 4000)).toBe(100);
+    // 83,040 Riels at 4000 rate = 2076 cents ($20.76)
+    expect(parseMoneyInputToCents("83040", "KHR", 4000)).toBe(2076);
+    // 82,000 Riels at 4100 rate = 2000 cents ($20.00)
+    expect(parseMoneyInputToCents("82000", "KHR", 4100)).toBe(2000);
   });
 
   it("normalizes weekly flexible spending to monthly equivalent using 52/12 ratio", () => {

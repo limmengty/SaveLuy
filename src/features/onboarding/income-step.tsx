@@ -7,6 +7,9 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Shield, LogOut } from "lucide-react";
 import { OnboardingIncomeSchema, type OnboardingIncomeInput } from "@/lib/validation/schemas";
 import { centsToInputValue, parseMoneyInputToCents, formatMoney } from "@/lib/money";
+import { Input } from "@/components/ui/input";
+
+import { STORAGE_KEYS, getMigratedStorageItem } from "@/lib/storage/migrate-storage";
 
 interface IncomeStepProps {
   locale: string;
@@ -27,7 +30,9 @@ export function IncomeStep({ locale }: IncomeStepProps) {
   const [initialData] = useState<OnboardingIncomeInput>(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("brokenomore.draft.income") || sessionStorage.getItem("onboarding_income");
+        const saved =
+          getMigratedStorageItem(STORAGE_KEYS.DRAFT_INCOME, STORAGE_KEYS.LEGACY_DRAFT_INCOME) ||
+          sessionStorage.getItem("onboarding_income");
         if (saved) return JSON.parse(saved);
       } catch {
         // Fallback
@@ -58,7 +63,7 @@ export function IncomeStep({ locale }: IncomeStepProps) {
     if (typeof window !== "undefined" && incomeValue > 0) {
       try {
         const draft = { rhythm: selectedRhythm, monthlyIncome: incomeValue };
-        localStorage.setItem("brokenomore.draft.income", JSON.stringify(draft));
+        localStorage.setItem(STORAGE_KEYS.DRAFT_INCOME, JSON.stringify(draft));
         sessionStorage.setItem("onboarding_income", JSON.stringify(draft));
       } catch {
         // Safe write
@@ -67,7 +72,7 @@ export function IncomeStep({ locale }: IncomeStepProps) {
   }, [selectedRhythm, incomeValue]);
 
   const onSubmit = (data: OnboardingIncomeInput) => {
-    localStorage.setItem("brokenomore.draft.income", JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEYS.DRAFT_INCOME, JSON.stringify(data));
     sessionStorage.setItem("onboarding_income", JSON.stringify(data));
     router.push(`/${locale}/onboarding/template`);
   };
@@ -148,21 +153,19 @@ export function IncomeStep({ locale }: IncomeStepProps) {
               <label htmlFor="monthly-income-input" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Estimated Monthly Income (USD)
               </label>
-              <div className="flex h-14 items-center rounded-2xl border border-border bg-card px-4 focus-within:ring-2 focus-within:ring-primary shadow-sm">
-                <span className="text-lg font-bold text-muted-foreground mr-1">$</span>
-                <input
-                  id="monthly-income-input"
-                  type="text"
-                  inputMode="decimal"
-                  defaultValue={centsToInputValue(incomeValue)}
-                  onChange={(e) => {
-                    const parsed = parseMoneyInputToCents(e.target.value);
-                    setValue("monthlyIncome", parsed, { shouldValidate: true });
-                  }}
-                  className="money w-full bg-transparent text-xl font-bold outline-none text-foreground"
-                  placeholder="0.00"
-                />
-              </div>
+              <Input
+                id="monthly-income-input"
+                type="text"
+                inputMode="decimal"
+                defaultValue={centsToInputValue(incomeValue)}
+                onChange={(e) => {
+                  const parsed = parseMoneyInputToCents(e.target.value);
+                  setValue("monthlyIncome", parsed, { shouldValidate: true });
+                }}
+                className="money text-lg font-bold"
+                placeholder="0.00"
+                startAdornment={<span className="text-lg font-bold text-muted-foreground">$</span>}
+              />
               <p className="text-xs text-muted-foreground flex items-center justify-between">
                 <span>Equivalent to {formatMoney(incomeValue)} per month</span>
                 {incomeValue > 0 && (

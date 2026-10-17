@@ -14,9 +14,15 @@ type ChoiceType = "future" | "carry" | "leave";
 
 export function ReviewView() {
   const t = useTranslations("review");
-  const { computed, allocateFuture } = useWealthEngine();
+  const { state, computed, submitWeeklyReview, reopenWeeklyReview } = useWealthEngine();
   const [choice, setChoice] = useState<ChoiceType>("future");
-  const [completed, setCompleted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const currentWeekStartIso = computed.weekStart.toISOString();
+  const isReviewed = Boolean(
+    state.plan.lastReviewedWeekStart &&
+      new Date(state.plan.lastReviewedWeekStart).getTime() >= computed.weekStart.getTime()
+  );
 
   const remainder = Math.max(0, computed.periodRemaining);
   const funSpent = computed.envelopeSpent.fun;
@@ -44,19 +50,25 @@ export function ReviewView() {
     },
   ];
 
-  const handleConfirm = () => {
-    if (choice === "future") {
-      allocateFuture(remainder);
-      toast.success(t("futureToast", { amount: formatMoney(remainder) }));
-    } else if (choice === "carry") {
-      toast.info(t("carryToast"));
-    } else {
-      toast.info(t("leaveToast"));
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      await submitWeeklyReview(choice, remainder);
+      if (choice === "future") {
+        toast.success(t("futureToast", { amount: formatMoney(remainder) }));
+      } else if (choice === "carry") {
+        toast.info(t("carryToast"));
+      } else {
+        toast.info(t("leaveToast"));
+      }
+    } catch {
+      toast.error("Failed to save weekly review");
+    } finally {
+      setIsSubmitting(false);
     }
-    setCompleted(true);
   };
 
-  if (completed) {
+  if (isReviewed) {
     return (
       <div className="max-w-2xl rounded-2xl border border-border bg-card p-10 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in-95">
         <LedgerMilestoneSweep />
@@ -66,12 +78,21 @@ export function ReviewView() {
             {t("weekBalancedDesc")}
           </p>
         </div>
-        <Link
-          href="./today"
-          className="mt-2 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-        >
-          {t("returnToToday")}
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <Link
+            href="./today"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            {t("returnToToday")}
+          </Link>
+          <button
+            type="button"
+            onClick={reopenWeeklyReview}
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-border px-5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+          >
+            {t("reopenReview")}
+          </button>
+        </div>
       </div>
     );
   }
@@ -191,11 +212,11 @@ export function ReviewView() {
 
       <div className="space-y-3 pt-2">
         <button
-          disabled={remainder === 0 && choice === "future"}
+          disabled={(remainder === 0 && choice === "future") || isSubmitting}
           onClick={handleConfirm}
           className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40 sm:w-auto sm:px-8 cursor-pointer shadow-xs active:scale-[0.99]"
         >
-          {t("confirm")}
+          {isSubmitting ? "Saving..." : t("confirm")}
         </button>
 
         <p className="text-xs text-muted-foreground leading-relaxed">

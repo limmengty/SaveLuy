@@ -8,7 +8,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   return {
-    title: locale === "km-KH" ? "BrokeNoMore — ការកំណត់" : "BrokeNoMore — Settings",
+    title: locale === "km-KH" ? "SaveLuy — ការកំណត់" : "SaveLuy — Settings",
   };
 }
 

@@ -25,6 +25,8 @@ import {
   LedgerIconDrink,
   LedgerIconGroceries,
 } from "@/components/illustrations/ledger-lines";
+import { WeeklyPaceMini } from "@/components/charts/weekly-pace-mini";
+import { aggregateWeeklyPace } from "@/features/analytics/utils/chart-aggregations";
 
 interface TodayViewProps {
   locale: string;
@@ -210,6 +212,12 @@ export function TodayView({ locale }: TodayViewProps) {
           </Dialog>
         </div>
 
+        {/* Weekly Pace Mini-Visualization */}
+        <WeeklyPaceMini
+          data={aggregateWeeklyPace(state.plan, state.transactions, new Date(), locale)}
+          locale={locale}
+        />
+
         {/* Quick Add */}
         <section aria-label={t("quickAdd")}>
           <div className="mb-3 flex items-center justify-between">
@@ -294,7 +302,7 @@ export function TodayView({ locale }: TodayViewProps) {
                 <p className="truncate text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
                   Custom
                 </p>
-                <p className="text-xs text-muted-foreground/70">{t("checkPurchase") || "Check impact"}</p>
+                <p className="text-xs text-muted-foreground/70">{t("otherAmount")}</p>
               </div>
             </button>
           </div>

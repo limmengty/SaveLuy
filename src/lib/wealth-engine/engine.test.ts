@@ -5,6 +5,8 @@ import {
   purchaseStatus,
   workHours,
   futureValue,
+  computeToday,
+  type Plan,
 } from "./engine";
 
 describe("Wealth Engine Calculations", () => {
@@ -90,4 +92,66 @@ describe("Wealth Engine Calculations", () => {
     const fv = futureValue(10000, 0.09, 10);
     expect(fv).toBe(23674);
   });
+
+  test("computeToday factors emergencyReliefCents into spending envelopes without baseline inflation", () => {
+    const { computeToday } = require("./engine");
+    const plan = {
+      essentialsLimit: 830, // $8.30
+      funLimit: 550,        // $5.50
+      homeFixedMonthly: 10000,
+      futureFundMonthly: 3000,
+      monthlyFlexibleIncome: 20000,
+      monthlyWorkHours: 160,
+      emergencyReliefCents: 5000, // $50.00 emergency relief
+    };
+
+    const res = computeToday(plan, [], new Date());
+    expect(res.emergencyRelief).toBe(5000);
+    // Weekly flexible limit includes relief for spending: 830 + 550 + 5000 = 6380
+    expect(res.weeklyFlexibleLimit).toBe(6380);
+    // Essentials envelope receives the relief credit: 830 + 5000 = 5830
+    expect(res.envelopeRemaining.essentials).toBe(5830);
+  });
+
+  test("cycleAnchorDay customizes start of week and paces mid-cycle days accurately", () => {
+    const plan: Plan = {
+      essentialsLimit: 7000, // $70/wk
+      funLimit: 3500,       // $35/wk
+      homeFixedMonthly: 10000,
+      futureFundMonthly: 3000,
+      monthlyFlexibleIncome: 20000,
+      monthlyWorkHours: 160,
+      cycleAnchorDay: 5, // Friday = 5
+    };
+
+    // Simulate Saturday (1 day after Friday anchor)
+    // 2026-10-17 is a Saturday (dow = 6)
+    const saturday = new Date(2026, 9, 17, 10, 0, 0);
+    const resSat = computeToday(plan, [], saturday);
+
+    // Days elapsed = 1 (Friday to Saturday), days remaining including today = 6
+    expect(resSat.daysRemainingIncludingToday).toBe(6);
+    // Flexible limit: 7000 + 3500 = 10500
+    expect(resSat.weeklyFlexibleLimit).toBe(10500);
+    // Baseline daily = 10500 / 7 = 1500; paceCapacityToday = 10500 / 6 = 1750
+    // todayStartLimit caps at baselineDaily (1500) so user is not prompted to overspend early in the week
+    expect(resSat.baselineDaily).toBe(1500);
+    expect(resSat.availableToday).toBe(1500);
+
+    // If spending earlier was higher (e.g. $45 spent on Friday):
+    // startOfDayRemaining = 10500 - 4500 = 6000
+    // paceCapacityToday across 6 remaining days = 6000 / 6 = 1000
+    const txFriday = [{
+      id: "t1",
+      amount: 4500,
+      envelope: "essentials" as const,
+      label: "Dinner",
+      createdAt: new Date(2026, 9, 16, 20, 0, 0).toISOString(),
+    }];
+    const resAfterSpend = computeToday(plan, txFriday, saturday);
+    expect(resAfterSpend.spendBeforeToday).toBe(4500);
+    expect(resAfterSpend.daysRemainingIncludingToday).toBe(6);
+    expect(resAfterSpend.availableToday).toBe(1000); // 6000 / 6 = 1000
+  });
 });
+

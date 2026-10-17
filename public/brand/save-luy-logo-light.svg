@@ -1,0 +1,11 @@
+<svg width="240" height="64" viewBox="0 0 240 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mark -->
+  <rect x="8" y="8" width="48" height="48" rx="14" stroke="#059669" stroke-width="3" fill="#059669" fill-opacity="0.1" />
+  <path d="M42 24H26C22.6863 24 20 26.6863 20 30C20 33.3137 22.6863 36 26 36H38" stroke="#059669" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M26 36H38C41.3137 36 44 38.6863 44 42C44 45.3137 41.3137 48 38 48H22" stroke="#059669" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="42" cy="24" r="2.5" fill="#059669" />
+  <circle cx="22" cy="48" r="2.5" fill="#059669" />
+
+  <!-- Wordmark for Light Canvas -->
+  <text x="68" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" fill="#0f172a" letter-spacing="-0.5">Save<tspan fill="#059669" font-weight="900">Luy</tspan></text>
+</svg>
