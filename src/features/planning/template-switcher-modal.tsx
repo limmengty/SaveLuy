@@ -41,18 +41,13 @@ export function TemplateSwitcherModal({
     return found ? found.id : (templates[0]?.id ?? "balanced_starter");
   }, [currentPlan, templates]);
 
-  const [selectedId, setSelectedId] = useState<string>(activeTemplateId);
-
-  // Always sync draft selection to active plan when dialog opens or active template changes
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedId(activeTemplateId);
-    }
-  }, [isOpen, activeTemplateId]);
+  // A null draft means "follow the active plan"; any explicit pick overrides it
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const selectedId = draftId ?? activeTemplateId;
 
   // Handle dismiss without applying: discard local draft state and reset to active template
   const handleDismiss = () => {
-    setSelectedId(activeTemplateId);
+    setDraftId(null);
     onClose();
   };
 
@@ -74,6 +69,7 @@ export function TemplateSwitcherModal({
 
   const handleApply = () => {
     onSelectTemplate(currentTpl);
+    setDraftId(null);
     onClose();
   };
 
@@ -130,7 +126,7 @@ export function TemplateSwitcherModal({
               return (
                 <div
                   key={tpl.id}
-                  onClick={() => setSelectedId(tpl.id)}
+                  onClick={() => setDraftId(tpl.id)}
                   className={`flex cursor-pointer flex-col gap-3 rounded-2xl border p-4.5 transition-all ${
                     isSelected
                       ? "border-primary bg-primary/5 shadow-sm shadow-primary/10 ring-1 ring-primary/40"

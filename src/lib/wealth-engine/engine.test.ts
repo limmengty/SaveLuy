@@ -6,6 +6,7 @@ import {
   workHours,
   futureValue,
   computeToday,
+  calculateHorizonCommitments,
   type Plan,
 } from "./engine";
 
@@ -94,7 +95,6 @@ describe("Wealth Engine Calculations", () => {
   });
 
   test("computeToday factors emergencyReliefCents into spending envelopes without baseline inflation", () => {
-    const { computeToday } = require("./engine");
     const plan = {
       essentialsLimit: 830, // $8.30
       funLimit: 550,        // $5.50
@@ -153,5 +153,50 @@ describe("Wealth Engine Calculations", () => {
     expect(resAfterSpend.daysRemainingIncludingToday).toBe(6);
     expect(resAfterSpend.availableToday).toBe(1000); // 6000 / 6 = 1000
   });
+
+  test("calculateHorizonCommitments detects commitments due within remaining cycle horizon", () => {
+    // Current date: Oct 18, 2026. Days remaining in cycle: 4 days (Oct 18, 19, 20, 21)
+    const today = new Date(2026, 9, 18);
+    const commitments = [
+      { id: "c1", label: "Electric Bill", amountCents: 3500, dueDayOfMonth: 20 }, // in horizon (Oct 20)
+      { id: "c2", label: "Internet", amountCents: 2500, dueDayOfMonth: 25 }, // outside horizon (Oct 25)
+      { id: "c3", label: "Rent", amountCents: 15000, dueDayOfMonth: 1 }, // outside horizon
+    ];
+
+    const result = calculateHorizonCommitments(commitments, today, 4);
+    expect(result.totalCents).toBe(3500);
+    expect(result.dueItems.length).toBe(1);
+    expect(result.dueItems[0].label).toBe("Electric Bill");
+  });
+
+  test("computeToday dynamic horizon protection ring-fences upcoming bills from daily spend", () => {
+    // Plan with $70 flexible weekly limit (1000 cents/day baseline)
+    // Internet bill ($20.00 / 2000 cents) due tomorrow
+    const plan: Plan = {
+      essentialsLimit: 4000,
+      funLimit: 3000,
+      homeFixedMonthly: 10000,
+      futureFundMonthly: 3000,
+      monthlyFlexibleIncome: 20000,
+      monthlyWorkHours: 160,
+      cycleAnchorDay: 0, // Sunday anchor
+      scheduledCommitments: [
+        { id: "c1", label: "WiFi Bill", amountCents: 2100, dueDayOfMonth: 19 },
+      ],
+    };
+
+    // Sunday Oct 18, 2026: 7 days remaining (Oct 18..24)
+    const sunday = new Date(2026, 9, 18, 8, 0, 0);
+    const res = computeToday(plan, [], sunday);
+
+    // WiFi is due on Oct 19 (tomorrow), which is inside the 7 days remaining.
+    expect(res.horizonCommitmentsCents).toBe(2100);
+    // Effective flexible pool: 7000 - 2100 = 4900 cents
+    // Baseline daily: 4900 / 7 = 700 cents ($7.00/day instead of $10.00/day)
+    expect(res.baselineDaily).toBe(700);
+    expect(res.availableToday).toBe(700);
+    expect(res.dueCommitments.length).toBe(1);
+  });
 });
+
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Gauge, Lock, Plus } from "lucide-react";
+import { AlertTriangle, CalendarCheck, CheckCircle2, Gauge, Lock, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useWealthEngine } from "@/lib/wealth-engine/provider";
@@ -34,7 +34,9 @@ interface TodayViewProps {
 
 export function TodayView({ locale }: TodayViewProps) {
   const t = useTranslations("today");
-  const { computed, state, isReady, addTransaction, reverseTransaction, setCheckOpen } = useWealthEngine();
+  const tCommon = useTranslations("common");
+  const tPlan = useTranslations("plan");
+  const { computed, state, isReady, addTransaction, reverseTransaction, setCheckOpen, submitWeeklyReview } = useWealthEngine();
   const [showCalculationDetails, setShowCalculationDetails] = useState(false);
   const [pendingQuickAddId, setPendingQuickAddId] = useState<string | null>(null);
 
@@ -188,6 +190,9 @@ export function TodayView({ locale }: TodayViewProps) {
               <dl className="money mt-2 grid gap-2 rounded-xl bg-secondary/50 p-4 text-sm border border-border/50 divide-y divide-border/40">
                 {[
                   [t("weeklyLimit"), formatMoney(computed.weeklyFlexibleLimit)],
+                  ...(computed.horizonCommitmentsCents > 0
+                    ? [[t("horizonReserved"), `−${formatMoney(computed.horizonCommitmentsCents)}`]]
+                    : []),
                   [t("spentBeforeToday"), formatMoney(computed.spendBeforeToday)],
                   [t("dailyBaseline"), formatMoney(computed.baselineDaily)],
                   [
@@ -212,6 +217,58 @@ export function TodayView({ locale }: TodayViewProps) {
           </Dialog>
         </div>
 
+        {/* Dynamic Horizon Cushion Banner */}
+        {computed.horizonCommitmentsCents > 0 && (
+          <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm animate-in fade-in">
+            <CalendarCheck className="size-5 shrink-0 text-primary mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-semibold text-foreground">
+                {t("horizonProtectedTitle", { amount: formatMoney(computed.horizonCommitmentsCents) })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {computed.dueCommitments?.map((c) => `${c.label} (${formatMoney(c.amountCents)})`).join(", ")} · {t("horizonProtectedSub")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* End-of-Cycle Quiet Sweep Ritual Card */}
+        {computed.daysRemainingIncludingToday === 1 &&
+          computed.periodRemaining > 0 &&
+          (!state.plan.lastReviewedWeekStart ||
+            new Date(state.plan.lastReviewedWeekStart).getTime() < computed.weekStart.getTime()) && (
+            <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 space-y-3 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-foreground">
+                  {t("cycleCompleteTitle", { amount: formatMoney(computed.periodRemaining) })}
+                </p>
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary">
+                  {t("cycleEnd")}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t("cycleCompleteDesc")}
+              </p>
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                <button
+                  onClick={() => {
+                    submitWeeklyReview("future", computed.periodRemaining);
+                    toast.success(t("sweepToFuture") + ` · ${formatMoney(computed.periodRemaining)}`);
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow-2xs"
+                >
+                  {t("sweepToFuture")}
+                </button>
+                <Link
+                  href={`/${locale}/review`}
+                  className="px-3.5 py-2 rounded-xl border border-border bg-card text-foreground text-xs font-semibold hover:bg-secondary transition-all"
+                >
+                  {t("viewFullReview")}
+                </Link>
+              </div>
+            </div>
+          )}
+
         {/* Weekly Pace Mini-Visualization */}
         <WeeklyPaceMini
           data={aggregateWeeklyPace(state.plan, state.transactions, new Date(), locale)}
@@ -222,7 +279,7 @@ export function TodayView({ locale }: TodayViewProps) {
         <section aria-label={t("quickAdd")}>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-muted-foreground">{t("quickAdd")}</h2>
-            <span className="text-xs text-muted-foreground">1-tap capture</span>
+            <span className="text-xs text-muted-foreground">{t("oneTapCapture")}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
             {state.quickActions.map((q) => {
@@ -243,7 +300,7 @@ export function TodayView({ locale }: TodayViewProps) {
 
                     toast(`${q.label} added · ${formatMoney(q.amount)}`, {
                       action: {
-                        label: "Undo",
+                        label: tCommon("undo"),
                         onClick: () => reverseTransaction(tx.id),
                       },
                     });
@@ -288,8 +345,8 @@ export function TodayView({ locale }: TodayViewProps) {
               );
             })}
 
-            <button
-              onClick={() => setCheckOpen(true)}
+            <Link
+              href={`/${locale}/check`}
               className="group flex h-[68px] items-center gap-3 rounded-2xl border border-dashed border-border/80 bg-card/40 p-3 text-left transition-all hover:border-primary/50 hover:bg-secondary/40 active:scale-[0.98] cursor-pointer"
             >
               <div
@@ -300,11 +357,11 @@ export function TodayView({ locale }: TodayViewProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
-                  Custom
+                  {t("custom")}
                 </p>
                 <p className="text-xs text-muted-foreground/70">{t("otherAmount")}</p>
               </div>
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -322,7 +379,7 @@ export function TodayView({ locale }: TodayViewProps) {
 
           {recentTxs.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              Nothing yet. Tap a quick-add above when you spend.
+              {t("noActivity")}
             </p>
           ) : (
             <ul className="divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden">
@@ -353,8 +410,8 @@ export function TodayView({ locale }: TodayViewProps) {
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("protected")}</h2>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card">
             {[
-              ["Home and fixed", state.plan.homeFixedMonthly],
-              ["Future fund", state.plan.futureFundMonthly + state.futureAllocated],
+              [tPlan("homeFixed"), state.plan.homeFixedMonthly],
+              [tPlan("futureFund"), state.plan.futureFundMonthly + state.futureAllocated],
             ].map(([k, v]) => (
               <div key={k as string} className="flex items-center justify-between px-4 py-3">
                 <span className="flex items-center gap-2 text-sm">
@@ -397,8 +454,8 @@ export function TodayView({ locale }: TodayViewProps) {
             href={`/${locale}/plan/wait-list`}
             className="block rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
           >
-            <p className="text-sm font-semibold">{state.waitList.length} on your wait list</p>
-            <p className="text-xs text-muted-foreground">Review when the 24 hours are up.</p>
+            <p className="text-sm font-semibold">{t("waitListCount", { count: state.waitList.length })}</p>
+            <p className="text-xs text-muted-foreground">{t("waitListReviewPrompt")}</p>
           </Link>
         )}
 
@@ -406,8 +463,8 @@ export function TodayView({ locale }: TodayViewProps) {
           href={`/${locale}/review`}
           className="block rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
         >
-          <p className="text-sm font-semibold">Weekly review</p>
-          <p className="text-xs text-muted-foreground">Decide what to do with the weekly remainder.</p>
+          <p className="text-sm font-semibold">{t("weeklyReviewTitle")}</p>
+          <p className="text-xs text-muted-foreground">{t("weeklyReviewSub")}</p>
         </Link>
       </aside>
     </div>

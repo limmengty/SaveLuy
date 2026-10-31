@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Calculator, CalendarCheck, Clock, Flame, Home, List, PieChart, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { CheckPanel } from "@/features/purchase-check/check-panel";
 import { SaveLuyLockup } from "@/components/brand/save-luy-lockup";
 import { SaveLuyMark } from "@/components/brand/save-luy-mark";
+import { getOfflineQueue } from "@/lib/offline/offline-queue";
 
 interface AppShellProps {
   title?: string;
@@ -21,11 +22,28 @@ interface AppShellProps {
   locale: string;
 }
 
+function subscribeConnectivity(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("online", onStoreChange);
+  window.addEventListener("offline", onStoreChange);
+  window.addEventListener("saveluy-offline-sync", onStoreChange);
+  return () => {
+    window.removeEventListener("online", onStoreChange);
+    window.removeEventListener("offline", onStoreChange);
+    window.removeEventListener("saveluy-offline-sync", onStoreChange);
+  };
+}
+
+const getIsOnline = () => navigator.onLine;
+const getOfflineCount = () => getOfflineQueue().length;
+
 export function AppShell({ title, action, children, locale }: AppShellProps) {
   const t = useTranslations("common");
   const pathname = usePathname();
-  const { setCheckOpen, now, isReady } = useWealthEngine();
+  const { now, isReady } = useWealthEngine();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const isOnline = useSyncExternalStore(subscribeConnectivity, getIsOnline, () => true);
+  const offlineCount = useSyncExternalStore(subscribeConnectivity, getOfflineCount, () => 0);
 
   useEffect(() => {
     let isMounted = true;
@@ -82,10 +100,15 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
     return pathname.startsWith(to);
   };
 
+  const isCheckActive = pathname.startsWith(`/${locale}/check`);
+
   const activeNavItem =
-    [...main, ...sub, { to: `/${locale}/settings`, label: t("settings") }].find((item) =>
-      isActive(item.to)
-    );
+    [
+      ...main,
+      ...sub,
+      { to: `/${locale}/check`, label: t("checkPurchase") },
+      { to: `/${locale}/settings`, label: t("settings") },
+    ].find((item) => isActive(item.to));
   const displayTitle =
     title &&
     title !== "Today" &&
@@ -94,7 +117,8 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
     title !== "Progress" &&
     title !== "Weekly review" &&
     title !== "Profile & settings" &&
-    title !== "Wait list"
+    title !== "Wait list" &&
+    title !== "Check purchase"
       ? title
       : (activeNavItem?.label || title || t("today"));
 
@@ -127,13 +151,18 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
             />
           ))}
 
-          <button
-            onClick={() => setCheckOpen(true)}
-            className="my-2 flex h-11 items-center gap-3 rounded-xl bg-primary px-3 font-semibold text-primary-foreground transition-all hover:opacity-95 shadow-sm shadow-primary/20 cursor-pointer active:scale-[0.98]"
+          <Link
+            href={`/${locale}/check`}
+            className={cn(
+              "my-2 flex h-11 items-center gap-3 rounded-xl px-3 font-semibold transition-all shadow-sm active:scale-[0.98]",
+              isCheckActive
+                ? "bg-primary text-primary-foreground shadow-primary/25 ring-2 ring-primary/40 ring-offset-2 ring-offset-sidebar"
+                : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-primary/10"
+            )}
           >
             <Calculator className="size-5" />
             {t("checkPurchase")}
-          </button>
+          </Link>
 
           {main.slice(2).map((item) => (
             <SideLink
@@ -190,8 +219,8 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       {/* Main Column */}
       <div className="flex flex-1 flex-col min-h-0 lg:pl-[232px] xl:pl-[248px]">
         {/* Unified Top Contextual Header with safe-area-inset-top */}
-        <header className="shrink-0 z-20 border-b border-border/80 header-solid safe-top">
-          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:px-6 lg:h-16 lg:px-8">
+        <header className="shrink-0 z-20 border-b border-border/80 header-solid safe-top px-4 md:px-6 lg:px-8">
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 lg:h-16">
             {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
               <Link href={`/${locale}/today`} className="lg:hidden shrink-0 flex items-center" aria-label="SaveLuy Home">
@@ -202,8 +231,22 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
               </h1>
             </div>
 
-            {/* Right: Date pill + Context action + Profile trigger */}
-            <div className="flex items-center gap-2.5">
+            {/* Right: Offline pill + Date pill + Context action + Profile trigger */}
+            <div className="flex items-center gap-2">
+              {(!isOnline || offlineCount > 0) && (
+                <span
+                  className={cn(
+                    "flex items-center gap-1.5 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full border transition-all",
+                    !isOnline
+                      ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                      : "border-primary/40 bg-primary/10 text-primary"
+                  )}
+                  title={!isOnline ? "Working offline. Transactions are queued safely." : "Syncing queued mutations"}
+                >
+                  <span className={cn("size-1.5 rounded-full", !isOnline ? "bg-amber-500 animate-pulse" : "bg-primary")} />
+                  <span>{!isOnline ? `${t("offline")}${offlineCount > 0 ? ` (${offlineCount})` : ""}` : t("syncing")}</span>
+                </span>
+              )}
               {formattedDate && (
                 <span className="text-xs font-semibold text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full whitespace-nowrap">
                   {formattedDate}
@@ -252,16 +295,25 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           <TabLink {...main[0]} active={isActive(main[0].to)} />
           <TabLink {...main[1]} active={isActive(main[1].to) || isActive(`/${locale}/plan/wait-list`)} />
 
-          <button
-            onClick={() => setCheckOpen(true)}
+          <Link
+            href={`/${locale}/check`}
             aria-label={t("check")}
             className="flex flex-col items-center justify-center -mt-3 text-xs font-semibold cursor-pointer active:scale-95 transition-transform"
           >
-            <span className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/25 border-2 border-background">
+            <span
+              className={cn(
+                "grid size-12 place-items-center rounded-2xl text-primary-foreground border-2 border-background transition-all",
+                isCheckActive
+                  ? "bg-primary shadow-lg shadow-primary/35 ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
+                  : "bg-primary shadow-md shadow-primary/25"
+              )}
+            >
               <Calculator className="size-5" />
             </span>
-            <span className="text-[10px] font-bold text-foreground mt-0.5">{t("check")}</span>
-          </button>
+            <span className={cn("text-[10px] font-bold mt-0.5", isCheckActive ? "text-primary" : "text-foreground")}>
+              {t("check")}
+            </span>
+          </Link>
 
           <TabLink {...main[2]} active={isActive(main[2].to)} />
           <TabLink {...main[3]} active={isActive(main[3].to)} />

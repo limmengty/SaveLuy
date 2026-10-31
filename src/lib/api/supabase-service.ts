@@ -136,6 +136,14 @@ export const supabaseApi = {
       .eq("status", "waiting")
       .order("created_at", { ascending: false });
 
+    // Fetch Scheduled Commitments (for Dynamic Horizon Protection)
+    const { data: commitmentRows } = await supabase
+      .from("scheduled_commitments")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .order("due_day_of_month", { ascending: true });
+
     // Fetch Future fund allocations and latest review from weekly reviews
     const { data: reviewRows } = await supabase
       .from("weekly_reviews")
@@ -211,6 +219,14 @@ export const supabaseApi = {
       }
     }
 
+    const scheduledCommitments: import("../wealth-engine/engine").ScheduledCommitment[] = (commitmentRows || []).map((c) => ({
+      id: c.id,
+      label: c.label,
+      amountCents: c.amount_cents,
+      dueDayOfMonth: c.due_day_of_month,
+      category: c.category,
+    }));
+
     const plan: Plan = planRow
       ? {
           essentialsLimit: planRow.essentials_limit_cents,
@@ -219,6 +235,7 @@ export const supabaseApi = {
           futureFundMonthly: planRow.future_fund_monthly_cents,
           monthlyFlexibleIncome: planRow.monthly_flexible_income_cents,
           monthlyWorkHours: planRow.monthly_work_hours,
+          scheduledCommitments,
           ...(latestReview && new Date(latestReview.created_at) >= new Date(currentWeekStartIso)
             ? {
                 lastReviewedWeekStart: currentWeekStartIso,
@@ -242,6 +259,7 @@ export const supabaseApi = {
           futureFundMonthly: 3000,
           monthlyFlexibleIncome: 20000,
           monthlyWorkHours: 160,
+          scheduledCommitments,
           ...(latestReview && new Date(latestReview.created_at) >= new Date(currentWeekStartIso)
             ? {
                 lastReviewedWeekStart: currentWeekStartIso,
@@ -264,6 +282,9 @@ export const supabaseApi = {
       label: t.label,
       createdAt: t.created_at,
       reversed: t.reversed,
+      inputCurrency: t.input_currency,
+      exchangeRateSnapshot: t.exchange_rate_snapshot ? Number(t.exchange_rate_snapshot) : undefined,
+      rawKhrAmount: t.raw_khr_amount ? Number(t.raw_khr_amount) : undefined,
     }));
 
     const quickActions: QuickAction[] = (qaRows && qaRows.length > 0)
@@ -333,7 +354,15 @@ export const supabaseApi = {
   },
 
   // Add transaction via RPC with table fallback
-  async addTransaction(tx: { clientMutationId: string; amount: number; envelope: EnvelopeId; label: string }) {
+  async addTransaction(tx: {
+    clientMutationId: string;
+    amount: number;
+    envelope: EnvelopeId;
+    label: string;
+    inputCurrency?: "USD" | "KHR";
+    exchangeRateSnapshot?: number;
+    rawKhrAmount?: number;
+  }) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -344,6 +373,9 @@ export const supabaseApi = {
       p_envelope: tx.envelope,
       p_label: tx.label,
       p_client_mutation_id: tx.clientMutationId,
+      p_input_currency: tx.inputCurrency || "USD",
+      p_exchange_rate_snapshot: tx.exchangeRateSnapshot || 4000.00,
+      p_raw_khr_amount: tx.rawKhrAmount || null,
     });
 
     if (error) {
@@ -354,13 +386,73 @@ export const supabaseApi = {
         amount_cents: tx.amount,
         envelope: tx.envelope,
         label: tx.label,
+        input_currency: tx.inputCurrency || "USD",
+        exchange_rate_snapshot: tx.exchangeRateSnapshot || 4000.00,
+        raw_khr_amount: tx.rawKhrAmount || null,
       });
       if (insertError) {
-        console.warn("Transactions insert error:", insertError.message);
+        if (insertError.message?.includes("exchange_rate_snapshot") || insertError.message?.includes("schema cache")) {
+          const { error: legacyInsertError } = await supabase.from("transactions").insert({
+            user_id: user.id,
+            client_mutation_id: tx.clientMutationId,
+            amount_cents: tx.amount,
+            envelope: tx.envelope,
+            label: tx.label,
+          });
+          if (legacyInsertError) {
+            console.warn("Transactions legacy insert error:", legacyInsertError.message);
+          }
+        } else {
+          console.warn("Transactions insert error:", insertError.message);
+        }
       }
       return null;
     }
     return data;
+  },
+
+  // Add scheduled commitment (dynamic bill horizon)
+  async addScheduledCommitment(commitment: {
+    label: string;
+    amountCents: number;
+    dueDayOfMonth: number;
+    category?: "housing" | "utilities" | "family" | "subscription" | "other";
+  }) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from("scheduled_commitments")
+      .insert({
+        user_id: user.id,
+        label: commitment.label,
+        amount_cents: commitment.amountCents,
+        due_day_of_month: commitment.dueDayOfMonth,
+        category: commitment.category || "other",
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.warn("Failed to add scheduled commitment:", error.message);
+      return null;
+    }
+    return data;
+  },
+
+  // Delete/Deactivate scheduled commitment
+  async deleteScheduledCommitment(id: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from("scheduled_commitments")
+      .update({ is_active: false })
+      .eq("id", id)
+      .eq("user_id", user.id);
   },
 
   // Reverse transaction via RPC with table fallback
@@ -541,15 +633,20 @@ export const supabaseApi = {
     return { success: true };
   },
 
-  // Update transaction label or envelope (US-012)
-  async updateTransaction(id: string, updates: { label?: string; envelope?: EnvelopeId }) {
+  // Update transaction label, envelope, or amount (US-012)
+  async updateTransaction(id: string, updates: { label?: string; envelope?: EnvelopeId; amount?: number }) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const payload: Record<string, unknown> = {};
+    if (updates.label !== undefined) payload.label = updates.label;
+    if (updates.envelope !== undefined) payload.envelope = updates.envelope;
+    if (updates.amount !== undefined) payload.amount_cents = updates.amount;
+
     await supabase
       .from("transactions")
-      .update(updates)
+      .update(payload)
       .eq("id", id)
       .eq("user_id", user.id);
   },

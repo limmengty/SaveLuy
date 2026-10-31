@@ -5,11 +5,13 @@ import {
   computeToday,
   type Transaction,
   type Plan,
+  type ScheduledCommitment,
 } from "../wealth-engine/engine";
 import type { QuickAction, WaitItem, UserPreferences } from "@/types/domain";
 import { supabaseApi } from "@/lib/api/supabase-service";
 import { setActiveCurrency } from "@/lib/money";
 import { STORAGE_KEYS, getMigratedStorageItem, removeAllStorageKeys } from "@/lib/storage/migrate-storage";
+import { enqueueMutation, dequeueMutation, replayOfflineQueue } from "@/lib/offline/offline-queue";
 
 const STORAGE_KEY = STORAGE_KEYS.STATE;
 
@@ -67,11 +69,14 @@ interface WealthEngineContextValue {
   allocateFuture: (cents: number) => void;
   submitWeeklyReview: (action: "future" | "carry" | "leave", remainderCents: number) => Promise<void>;
   reopenWeeklyReview: () => void;
-  editTransaction: (id: string, updates: { label?: string; envelope?: "essentials" | "fun" }) => void;
+  editTransaction: (id: string, updates: { label?: string; envelope?: "essentials" | "fun"; amount?: number }) => void;
   unlockEmergencyMoney: (amountCents: number, reason: string) => Promise<void>;
   revertEmergencyUnlock: (recordId: string) => Promise<void>;
   clearAllEmergencyRelief: () => Promise<void>;
   updateEmergencyReason: (recordId: string, newReason: string) => Promise<void>;
+  addScheduledCommitment: (commitment: Omit<ScheduledCommitment, "id">) => Promise<void>;
+  deleteScheduledCommitment: (id: string) => Promise<void>;
+  syncWithCloud: () => Promise<void>;
   resetAll: () => void;
   checkOpen: boolean;
   setCheckOpen: (open: boolean) => void;
@@ -149,7 +154,31 @@ export function WealthEngineProvider({ children }: { children: ReactNode }) {
     }
   }, [state, isReady]);
 
-  // Transaction mutation with optimistic local update + Supabase sync
+  // Automatic offline mutation replay on reconnect
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOnline = async () => {
+      await replayOfflineQueue(async (mut) => {
+        if (mut.type === "ADD_TRANSACTION") {
+          const p = mut.payload as Parameters<typeof supabaseApi.addTransaction>[0];
+          const res = await supabaseApi.addTransaction(p);
+          return res !== null;
+        }
+        return true;
+      });
+    };
+
+    window.addEventListener("online", handleOnline);
+    // Initial check on mount
+    handleOnline();
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, []);
+
+  // Transaction mutation with optimistic local update + Supabase sync & offline resilience
   const addTransaction = useCallback((tx: Omit<Transaction, "id" | "createdAt">) => {
     const clientMutationId = `mut-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newTx: Transaction = {
@@ -164,14 +193,32 @@ export function WealthEngineProvider({ children }: { children: ReactNode }) {
     }));
     setNow(new Date());
 
+    // Enqueue for offline resilience
+    enqueueMutation("ADD_TRANSACTION", clientMutationId, {
+      clientMutationId,
+      amount: tx.amount,
+      envelope: tx.envelope,
+      label: tx.label,
+      inputCurrency: tx.inputCurrency,
+      exchangeRateSnapshot: tx.exchangeRateSnapshot,
+      rawKhrAmount: tx.rawKhrAmount,
+    });
+
     // Asynchronously synchronize with Supabase backend
     supabaseApi.addTransaction({
       clientMutationId,
       amount: tx.amount,
       envelope: tx.envelope,
       label: tx.label,
+      inputCurrency: tx.inputCurrency,
+      exchangeRateSnapshot: tx.exchangeRateSnapshot,
+      rawKhrAmount: tx.rawKhrAmount,
+    }).then((res) => {
+      if (res !== null) {
+        dequeueMutation(clientMutationId);
+      }
     }).catch(() => {
-      // Offline or error: mutation preserved in local storage
+      // Offline: mutation securely preserved in offline queue
     });
 
     return newTx;
@@ -336,11 +383,12 @@ export function WealthEngineProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Edit transaction (US-012)
-  const editTransaction = useCallback((id: string, updates: { label?: string; envelope?: "essentials" | "fun" }) => {
+  const editTransaction = useCallback((id: string, updates: { label?: string; envelope?: "essentials" | "fun"; amount?: number }) => {
     setState((prev) => ({
       ...prev,
       transactions: prev.transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     }));
+    setNow(new Date());
 
     supabaseApi.updateTransaction(id, updates).catch(() => {});
   }, []);
@@ -520,6 +568,75 @@ export function WealthEngineProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Add scheduled commitment (dynamic horizon protection)
+  const addScheduledCommitment = useCallback(async (commitment: Omit<ScheduledCommitment, "id">) => {
+    const tempId = `cmt-${Date.now()}`;
+    const newCmt: ScheduledCommitment = { ...commitment, id: tempId };
+
+    setState((prev) => {
+      const existing = prev.plan.scheduledCommitments || [];
+      const updatedPlan = {
+        ...prev.plan,
+        scheduledCommitments: [...existing, newCmt],
+      };
+      return {
+        ...prev,
+        plan: updatedPlan,
+      };
+    });
+
+    try {
+      const saved = await supabaseApi.addScheduledCommitment(commitment);
+      if (saved?.id) {
+        setState((prev) => {
+          const existing = prev.plan.scheduledCommitments || [];
+          return {
+            ...prev,
+            plan: {
+              ...prev.plan,
+              scheduledCommitments: existing.map((c) => (c.id === tempId ? { ...c, id: saved.id } : c)),
+            },
+          };
+        });
+      }
+    } catch {
+      // Kept in optimistic local state
+    }
+  }, []);
+
+  // Delete scheduled commitment
+  const deleteScheduledCommitment = useCallback(async (id: string) => {
+    setState((prev) => {
+      const existing = prev.plan.scheduledCommitments || [];
+      return {
+        ...prev,
+        plan: {
+          ...prev.plan,
+          scheduledCommitments: existing.filter((c) => c.id !== id),
+        },
+      };
+    });
+
+    await supabaseApi.deleteScheduledCommitment(id).catch(() => {});
+  }, []);
+
+  const syncWithCloud = useCallback(async () => {
+    try {
+      const user = await supabaseApi.getUser();
+      if (user) {
+        setIsAuthenticated(true);
+        const cloudData = await supabaseApi.fetchUserData();
+        if (cloudData) {
+          setState(cloudData);
+          setNow(new Date());
+        }
+      }
+    } catch (err) {
+      console.error("Failed to sync with cloud:", err);
+      throw err;
+    }
+  }, []);
+
   const resetAll = useCallback(() => {
     const fresh = seedState();
     setState(fresh);
@@ -557,6 +674,9 @@ export function WealthEngineProvider({ children }: { children: ReactNode }) {
         revertEmergencyUnlock,
         clearAllEmergencyRelief,
         updateEmergencyReason,
+        addScheduledCommitment,
+        deleteScheduledCommitment,
+        syncWithCloud,
         resetAll,
         checkOpen,
         setCheckOpen,

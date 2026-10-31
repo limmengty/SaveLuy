@@ -229,7 +229,7 @@ export function SettingsView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">{t("signedInAs")}</p>
-                <p className="text-sm font-semibold text-foreground">Authenticated User</p>
+                <p className="text-sm font-semibold text-foreground">{t("authenticatedUser")}</p>
               </div>
               <button
                 onClick={handleSignOut}
@@ -374,12 +374,12 @@ export function SettingsView() {
                           setIsEditingCustomRate(false);
                           toast.success(t("exchangeRateUpdated", { rate: parsed.toLocaleString() }));
                         } else {
-                          toast.error("Please enter a valid rate between 1,000 and 10,000");
+                          toast.error(t("invalidRateError"));
                         }
                       }}
                       className="text-[11px] font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded-md hover:bg-primary/90 cursor-pointer"
                     >
-                      Save
+                      {t("save")}
                     </button>
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export function SettingsView() {
                     type="button"
                     onClick={() => {
                       updatePlan({ cycleAnchorDay: item.day });
-                      toast.success(`Pacing cycle anchored to ${item.label}`);
+                      toast.success(t("cycleAnchorToast", { day: item.label }));
                     }}
                     className={cn(
                       "flex flex-col justify-center rounded-xl border p-3 text-left transition-colors cursor-pointer min-h-[64px]",
@@ -457,13 +457,13 @@ export function SettingsView() {
           <div className="border-t border-border pt-4 space-y-2">
             <div className="flex items-center gap-2">
               <Sun className="size-4 text-muted-foreground" />
-              <label className="text-sm font-medium text-foreground">Theme</label>
+              <label className="text-sm font-medium text-foreground">{t("theme")}</label>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { id: "dark", label: "Dark", icon: Moon, desc: "Obsidian" },
-                { id: "light", label: "Light", icon: Sun, desc: "Paper" },
-                { id: "system", label: "System", icon: Laptop, desc: "Auto" },
+                { id: "dark", label: t("dark"), icon: Moon, desc: t("themeDarkDesc") },
+                { id: "light", label: t("light"), icon: Sun, desc: t("themeLightDesc") },
+                { id: "system", label: t("system"), icon: Laptop, desc: t("themeSystemDesc") },
               ].map((m) => {
                 const Icon = m.icon;
                 const isSelected = theme === m.id;
@@ -472,7 +472,7 @@ export function SettingsView() {
                     key={m.id}
                     onClick={() => {
                       setTheme(m.id);
-                      toast.success(`Theme switched to ${m.label}`);
+                      toast.success(t("themeSwitched", { theme: m.label }));
                     }}
                     className={cn(
                       "flex flex-col justify-center rounded-xl border p-3.5 text-left transition-colors cursor-pointer min-h-[70px]",
@@ -544,31 +544,6 @@ export function SettingsView() {
           <p>
             <strong className="text-foreground">{t("p3Title")}</strong> {t("p3Desc")}
           </p>
-        </div>
-      </section>
-
-      {/* Reset & Data */}
-      <section aria-label="Data management">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Local Cache & Sync</h2>
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">
-            Clear offline cached records and reload live transactions directly from your remote Supabase database.
-          </p>
-          <div className="mt-4">
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  removeAllStorageKeys([STORAGE_KEYS.STATE, STORAGE_KEYS.LEGACY_STATE]);
-                  sessionStorage.clear();
-                  window.location.reload();
-                }
-                toast.success("Cache cleared. Reloading from database...");
-              }}
-              className="rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-secondary cursor-pointer"
-            >
-              Clear local cache & refresh
-            </button>
-          </div>
         </div>
       </section>
     </div>

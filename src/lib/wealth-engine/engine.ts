@@ -10,6 +10,9 @@ export interface Transaction {
   label: string;
   createdAt: string; // ISO string
   reversed?: boolean;
+  inputCurrency?: "USD" | "KHR";
+  exchangeRateSnapshot?: number;
+  rawKhrAmount?: number;
 }
 
 export interface EmergencyUnlockRecord {
@@ -17,6 +20,14 @@ export interface EmergencyUnlockRecord {
   amountCents: number;
   reason: string;
   createdAt: string; // ISO date string
+}
+
+export interface ScheduledCommitment {
+  id: string;
+  label: string;
+  amountCents: number;
+  dueDayOfMonth: number; // 1-31
+  category?: "housing" | "utilities" | "family" | "subscription" | "other";
 }
 
 export interface Plan {
@@ -34,6 +45,7 @@ export interface Plan {
   cycleAnchorDay?: number; // 0 = Sunday, 1 = Monday (default), etc.
   lastReviewedWeekStart?: string; // ISO date string of reviewed cycle start
   lastReviewAction?: "future" | "carry" | "leave"; // disposition choice made
+  scheduledCommitments?: ScheduledCommitment[];
 }
 
 export interface DayInputs {
@@ -42,6 +54,7 @@ export interface DayInputs {
   spendToday: number; // cents
   daysInPeriod: number;
   daysRemainingIncludingToday: number;
+  horizonCommitmentsCents?: number;
 }
 
 export interface DailyCalculationResult {
@@ -51,13 +64,16 @@ export interface DailyCalculationResult {
   todayStartLimit: number;
   availableToday: number;
   confirmed: number;
+  horizonReserve: number;
 }
 
 export function daily(i: DayInputs): DailyCalculationResult {
-  const baselineDaily = Math.floor(i.weeklyFlexibleLimit / i.daysInPeriod);
+  const horizonReserve = Math.max(0, i.horizonCommitmentsCents || 0);
+  const effectiveFlexibleLimit = Math.max(0, i.weeklyFlexibleLimit - horizonReserve);
+  const baselineDaily = Math.floor(effectiveFlexibleLimit / i.daysInPeriod);
   const confirmed = i.spendBeforeToday + i.spendToday;
-  const periodRemaining = i.weeklyFlexibleLimit - confirmed;
-  const startOfDayRemaining = i.weeklyFlexibleLimit - i.spendBeforeToday;
+  const periodRemaining = effectiveFlexibleLimit - confirmed;
+  const startOfDayRemaining = effectiveFlexibleLimit - i.spendBeforeToday;
   const paceCapacityToday = Math.floor(
     Math.max(0, startOfDayRemaining) / i.daysRemainingIncludingToday,
   );
@@ -70,6 +86,7 @@ export function daily(i: DayInputs): DailyCalculationResult {
     todayStartLimit,
     availableToday,
     confirmed,
+    horizonReserve,
   };
 }
 
@@ -123,6 +140,36 @@ export function weekStart(now: Date, anchorDay: number = 1): Date {
   return d;
 }
 
+export function calculateHorizonCommitments(
+  commitments: ScheduledCommitment[] | undefined,
+  now: Date,
+  daysRemainingIncludingToday: number
+): { totalCents: number; dueItems: ScheduledCommitment[] } {
+  if (!commitments || commitments.length === 0) {
+    return { totalCents: 0, dueItems: [] };
+  }
+
+  const currentDay = now.getDate();
+  const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+  // Find commitments that fall between today and (today + daysRemainingIncludingToday - 1)
+  const dueItems = commitments.filter((item) => {
+    for (let offset = 0; offset < daysRemainingIncludingToday; offset++) {
+      let targetDay = currentDay + offset;
+      if (targetDay > daysInCurrentMonth) {
+        targetDay = targetDay - daysInCurrentMonth; // wraps into next month
+      }
+      if (item.dueDayOfMonth === targetDay) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  const totalCents = dueItems.reduce((acc, curr) => acc + curr.amountCents, 0);
+  return { totalCents, dueItems };
+}
+
 export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
   const anchorDay = typeof plan.cycleAnchorDay === "number" ? plan.cycleAnchorDay : 1;
   const start = weekStart(now, anchorDay);
@@ -150,6 +197,9 @@ export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
     }
   }
 
+  const { totalCents: horizonCommitmentsCents, dueItems: dueCommitments } =
+    calculateHorizonCommitments(plan.scheduledCommitments, now, daysRemainingIncludingToday);
+
   const emergencyRelief = Math.max(0, plan.emergencyReliefCents ?? 0);
   const weeklyFlexibleLimit = plan.essentialsLimit + plan.funLimit + emergencyRelief;
   const d = daily({
@@ -158,6 +208,7 @@ export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
     spendToday: today,
     daysInPeriod: 7,
     daysRemainingIncludingToday,
+    horizonCommitmentsCents,
   });
 
   const status: "on" | "adjusted" | "attention" =
@@ -182,6 +233,8 @@ export function computeToday(plan: Plan, txs: Transaction[], now: Date) {
       fun: plan.funLimit - fun,
     },
     emergencyRelief,
+    horizonCommitmentsCents,
+    dueCommitments,
     status,
     weekStart: start,
   };

@@ -14,6 +14,7 @@ type ChoiceType = "future" | "carry" | "leave";
 
 export function ReviewView() {
   const t = useTranslations("review");
+  const tCommon = useTranslations("common");
   const { state, computed, submitWeeklyReview, reopenWeeklyReview } = useWealthEngine();
   const [choice, setChoice] = useState<ChoiceType>("future");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +63,7 @@ export function ReviewView() {
         toast.info(t("leaveToast"));
       }
     } catch {
-      toast.error("Failed to save weekly review");
+      toast.error(t("saveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -216,7 +217,7 @@ export function ReviewView() {
           onClick={handleConfirm}
           className="h-12 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-all hover:opacity-90 disabled:opacity-40 sm:w-auto sm:px-8 cursor-pointer shadow-xs active:scale-[0.99]"
         >
-          {isSubmitting ? "Saving..." : t("confirm")}
+          {isSubmitting ? tCommon("saving") : t("confirm")}
         </button>
 
         <p className="text-xs text-muted-foreground leading-relaxed">
