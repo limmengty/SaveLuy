@@ -468,6 +468,21 @@
   }
 }
 
+/* Installed iOS web apps use solid navigation surfaces for crisp rendering. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .bar-glass,
+  .glass-dock,
+  [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .bar-glass,
+  .glass-dock {
+    background-color: var(--background);
+  }
+}
+
 @keyframes fadeNum {
   from {
     opacity: 0;
