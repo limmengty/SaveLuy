@@ -1,7 +1,7 @@
 # Production Deployment Plan
 
 **Scope:** Apple HIG-aligned web design migration and the existing dual-currency / scheduled-commitments database migration.
-**Status:** Draft; production deployment has not been run or inspected.
+**Status:** App deployments completed and database migrations applied on 2026-11-01. Authenticated end-to-end and cross-user RLS smoke tests remain outstanding.
 **Date:** 2026-11-01
 
 ## Release contents
@@ -13,8 +13,8 @@
   `supabase/migrations/20261018000000_dual_currency_and_horizon.sql`. It adds
   currency metadata to transactions, updates `log_expense`, and creates
   `public.scheduled_commitments` with RLS.
-- The app host and production Supabase migration history are not identified from
-  repository configuration. Confirm both before scheduling the release.
+- The app is deployed through Vercel. The production Supabase project is
+  `saveluy-prod` (`jqonymcffmhhzcqpiehs`).
 
 ## Production credential handling
 
@@ -28,8 +28,33 @@ Use the production host's protected environment settings for those two app
 values. Database migration access must use a scoped Supabase access token or a
 database credential stored in the CI secret manager, never a frontend
 publishable key. Limit the credential to this project and the deployment job.
-No database credential or Supabase CLI installation was found locally, so
-production state has not been queried.
+Production migrations were applied through the authenticated Supabase CLI.
+No database password or service-role key was added to the repository.
+
+## Production execution record — 2026-11-01
+
+- Vercel reported successful deployments for both app projects on `main`.
+- Before migration, the target had no recorded migrations or public tables,
+  one Auth user, no custom Auth trigger, and no `avatars` bucket or objects.
+  Supabase reported no physical backups and PITR disabled. The existing Auth
+  account was outside the objects touched by the initial schema migration.
+- Applied all seven migrations in timestamp order through
+  `20261101133247_scheduled_commitments_minimal_privileges.sql`. No seed data
+  was applied. The first attempt stopped before applying a migration because
+  the initial SQL could not resolve `uuid_generate_v4()`; migration history
+  remained empty, and the unapplied files were corrected to use
+  `gen_random_uuid()` before retrying.
+- Verified all seven migration versions are recorded. The
+  `scheduled_commitments` table has RLS and an owner policy; anonymous table
+  access is denied, authenticated select/insert/update are allowed, and
+  authenticated delete and `service_role` access are denied. An anonymous
+  Data API request returned permission denied as expected.
+- Verified both the four-argument and seven-argument `log_expense` functions
+  exist. The migration sends a PostgREST schema reload notification.
+- Not yet verified with authenticated app sessions: transaction flows,
+  scheduled-commitment CRUD, or isolation between two users. There is no
+  staging Supabase project available in the current CLI account. The existing
+  Auth user has no profile row yet; the OAuth callback creates it on login.
 
 ## Required preflight
 
