@@ -1,7 +1,6 @@
 -- ==============================================================================
 -- BrokeNoMore Schema: Complete Clean & Re-migration Specification
 -- Run this script in Supabase Dashboard > SQL Editor
--- Project Reference: tfjqwsjisvxbcdqoacbs
 -- 
 -- 1. Drops legacy objects cleanly with cascade
 -- 2. Creates all tables with proper types, check constraints, and RLS
@@ -62,7 +61,7 @@ create table public.user_preferences (
 -- 2. PLANS & PLAN PERIODS
 -- ------------------------------------------------------------------------------
 create table public.plans (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   essentials_limit_cents integer not null check (essentials_limit_cents >= 0),
   fun_limit_cents integer not null check (fun_limit_cents >= 0),
@@ -78,7 +77,7 @@ create table public.plans (
 create unique index idx_plans_user_active on public.plans(user_id) where (is_active = true);
 
 create table public.plan_periods (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   plan_id uuid references public.plans on delete cascade not null,
   start_date date not null,
@@ -95,7 +94,7 @@ create index idx_plan_periods_user_closed on public.plan_periods(user_id, is_clo
 -- 3. TRANSACTIONS
 -- ------------------------------------------------------------------------------
 create table public.transactions (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   period_id uuid references public.plan_periods on delete set null,
   client_mutation_id text unique,
@@ -114,7 +113,7 @@ create index idx_transactions_user_date on public.transactions(user_id, created_
 -- 4. QUICK ACTIONS
 -- ------------------------------------------------------------------------------
 create table public.quick_actions (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   label text not null,
   emoji text not null,
@@ -130,7 +129,7 @@ create index idx_quick_actions_user_order on public.quick_actions(user_id, displ
 -- 5. WAIT ITEMS
 -- ------------------------------------------------------------------------------
 create table public.wait_items (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   label text not null,
   amount_cents integer not null check (amount_cents > 0),
@@ -146,7 +145,7 @@ create index idx_wait_items_user_status on public.wait_items(user_id, status);
 -- 6. WEEKLY REVIEWS
 -- ------------------------------------------------------------------------------
 create table public.weekly_reviews (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   period_id uuid references public.plan_periods on delete cascade not null,
   planned_cents integer not null,
@@ -162,7 +161,7 @@ create index idx_weekly_reviews_user on public.weekly_reviews(user_id, created_a
 -- 7. AUDIT EVENTS
 -- ------------------------------------------------------------------------------
 create table public.audit_events (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   event_type text not null,
   payload jsonb default '{}'::jsonb not null,

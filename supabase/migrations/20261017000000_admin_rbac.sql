@@ -7,7 +7,7 @@
 
 -- 1. Staff Roles Table
 create table if not exists public.staff_roles (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   role text not null check (role in ('support_agent', 'content_manager', 'moderator', 'analyst', 'super_admin')),
   granted_by uuid references auth.users on delete set null,
@@ -17,7 +17,7 @@ create table if not exists public.staff_roles (
 
 -- 2. Staff Action Audit Log
 create table if not exists public.staff_audit_logs (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   actor_id uuid references auth.users on delete set null not null,
   role text not null,
   action text not null,
@@ -30,7 +30,7 @@ create table if not exists public.staff_audit_logs (
 
 -- 3. Attention Queue (System Incidents, Flagged Content, Sync Issues)
 create table if not exists public.attention_queue (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   severity text not null check (severity in ('critical', 'high', 'medium', 'low')),
   category text not null check (category in ('incident', 'moderation', 'config_warning', 'experiment_anomaly')),
   title text not null,
