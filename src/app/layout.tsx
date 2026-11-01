@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
-import { JetBrains_Mono, Kantumruy_Pro } from "next/font/google";
+import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./style.css";
 
-const fontKhmer = Kantumruy_Pro({
-  subsets: ["khmer", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+const fontKhmer = localFont({
+  src: "./fonts/KantumruyPro[wght].ttf",
+  weight: "100 700",
   variable: "--font-khmer",
   display: "swap",
 });
 
-const fontMonoData = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const fontMonoData = localFont({
+  src: "./fonts/JetBrainsMono[wght].ttf",
+  weight: "100 800",
   variable: "--font-mono-data",
   display: "swap",
 });
