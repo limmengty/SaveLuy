@@ -67,7 +67,7 @@ export default function RootLayout({
           href="/icon.svg"
         />
       </head>
-      <body className={`${fontKhmer.variable} ${fontMonoData.variable} font-sans antialiased bg-background text-foreground overflow-hidden selection:bg-primary/20 selection:text-primary`}>
+      <body className={`${fontKhmer.variable} ${fontMonoData.variable} font-sans bg-background text-foreground overflow-hidden selection:bg-primary/20 selection:text-primary`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>

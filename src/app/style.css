@@ -233,8 +233,6 @@
       "Helvetica Neue", Arial, var(--font-khmer, "Kantumruy Pro"), sans-serif;
     font-size: var(--text-body);
     line-height: 24px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
   :lang(km),
   .font-khmer {
@@ -446,18 +444,13 @@
   padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
 }
 
-/*
-  Functional-layer material (liquid-glass.md › Cross-platform translation):
-  backdrop blur + saturation boost + translucent fill + hairline border.
-  Content scrolls beneath; glass stays off the content layer.
-*/
+/* Keep the iOS top edge and its text on a plain, crisp system surface. */
 @utility bar-glass {
-  background-color: var(--glass-bg);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  backdrop-filter: blur(24px) saturate(1.4);
+  background-color: var(--background);
   box-shadow: inset 0 1px 0 0 var(--glass-edge);
 }
 
+/* The bottom navigation remains the app's only translucent navigation layer. */
 @utility glass-dock {
   background-color: var(--glass-bg);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
