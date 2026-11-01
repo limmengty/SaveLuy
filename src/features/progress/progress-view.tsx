@@ -46,7 +46,7 @@ export function ProgressView() {
         <ProtectedMoneyChart plan={state.plan} futureAllocated={state.futureAllocated} />
 
         {/* Discipline & Streaks Hero */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:p-7 shadow-sm">
+        <div className="rounded-[10px] bg-card p-5 lg:p-7 shadow-sm">
           <p className="eyebrow">{t("disciplineMomentum")}</p>
           <div className="mt-2 flex items-baseline gap-3">
             <span className="amount-hero flex items-center gap-2">
@@ -77,11 +77,11 @@ export function ProgressView() {
 
         {/* Milestones Achieved */}
         <section aria-label="Milestones">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("milestones")}</h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-            <div className="flex items-center gap-4 p-4">
-              <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary shrink-0">
-                <ShieldCheck className="size-5" />
+          <h2 className="ios-section-header">{t("milestones")}</h2>
+          <div className="ios-list">
+            <div className="ios-row ios-row-icon-sep flex items-center gap-3 px-4 py-3">
+              <div className="ios-icon bg-primary text-primary-foreground">
+                <ShieldCheck className="size-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold">{t("m1Title")}</p>
@@ -89,9 +89,9 @@ export function ProgressView() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-4">
-              <div className="grid size-10 place-items-center rounded-xl bg-warning/10 text-warning shrink-0">
-                <Award className="size-5" />
+            <div className="ios-row ios-row-icon-sep flex items-center gap-3 px-4 py-3">
+              <div className="ios-icon bg-warning text-warning-foreground">
+                <Award className="size-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold">{t("m2Title")}</p>
@@ -99,9 +99,9 @@ export function ProgressView() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-4">
-              <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary shrink-0">
-                <CalendarCheck className="size-5" />
+            <div className="ios-row ios-row-icon-sep flex items-center gap-3 px-4 py-3">
+              <div className="ios-icon bg-primary text-primary-foreground">
+                <CalendarCheck className="size-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold">{t("m3Title")}</p>
@@ -115,11 +115,11 @@ export function ProgressView() {
       {/* Anonymous League & Community */}
       <aside className="space-y-7">
         <section aria-label="Anonymous League">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("communityPacing")}</h2>
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-xl bg-secondary text-primary shrink-0">
-                <Trophy className="size-5" />
+          <h2 className="ios-section-header">{t("communityPacing")}</h2>
+          <div className="ios-list">
+            <div className="ios-row ios-row-icon-sep flex items-center gap-3 px-4 py-3">
+              <div className="ios-icon bg-secondary text-primary">
+                <Trophy className="size-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold">{t("leagueTitle")}</p>
@@ -127,12 +127,12 @@ export function ProgressView() {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="ios-row px-4 py-3 text-xs text-muted-foreground leading-relaxed">
               {t("leagueDisclaimer")}
             </p>
 
             {optedIn ? (
-              <div className="space-y-3 pt-2">
+              <div className="ios-row flex w-full flex-col items-stretch gap-3 px-4 py-4">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span>{t("yourRank")}</span>
                   <span className="text-primary font-bold">{t("topPercent")}</span>
@@ -161,7 +161,7 @@ export function ProgressView() {
             ) : (
               <button
                 onClick={() => setOptedIn(true)}
-                className="w-full h-11 rounded-xl bg-secondary text-sm font-semibold hover:bg-secondary/80 transition-colors cursor-pointer"
+                className="ios-row w-full justify-center px-4 py-3.5 text-sm font-semibold hover:bg-secondary transition-colors cursor-pointer"
               >
                 {t("joinLeague")}
               </button>

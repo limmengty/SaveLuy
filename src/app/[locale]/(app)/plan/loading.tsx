@@ -7,7 +7,7 @@ export function PlanSkeleton() {
       {/* Left Column: Weekly Flexible Envelopes */}
       <section className="space-y-3">
         <Skeleton className="h-4 w-32" />
-        <div className="space-y-6 rounded-2xl border border-border bg-card p-5">
+        <div className="space-y-6 rounded-[10px] bg-card p-5">
           {/* Essentials input skeleton */}
           <div className="space-y-2">
             <Skeleton className="h-3 w-20" />
@@ -45,7 +45,7 @@ export function PlanSkeleton() {
         {/* Protected monthly skeleton */}
         <section className="space-y-3">
           <Skeleton className="h-4 w-36" />
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <div className="space-y-5 rounded-[10px] bg-card p-5">
             <Skeleton className="h-4 w-64" />
             <div className="space-y-2">
               <Skeleton className="h-3 w-28" />
@@ -67,7 +67,7 @@ export function PlanSkeleton() {
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-6 w-36 rounded-full" />
           </div>
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <div className="space-y-5 rounded-[10px] bg-card p-5">
             <div className="space-y-2">
               <Skeleton className="h-3 w-36" />
               <Skeleton className="h-11 w-full rounded-xl" />

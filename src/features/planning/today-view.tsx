@@ -45,7 +45,7 @@ export function TodayView({ locale }: TodayViewProps) {
       <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_350px]">
         <div className="space-y-7">
           {/* Hero Card Skeleton */}
-          <div className="rounded-2xl border border-border bg-card p-5 lg:p-7 space-y-4">
+          <div className="rounded-[10px] bg-card p-5 lg:p-7 space-y-4">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-14 w-44" />
             <Skeleton className="h-5 w-40" />
@@ -75,7 +75,7 @@ export function TodayView({ locale }: TodayViewProps) {
           {/* Latest Activity Skeleton */}
           <div className="space-y-3">
             <Skeleton className="h-4 w-28" />
-            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+            <div className="rounded-[10px] bg-card p-4 space-y-3">
               <Skeleton className="h-12 w-full rounded-xl" />
               <Skeleton className="h-12 w-full rounded-xl" />
               <Skeleton className="h-12 w-full rounded-xl" />
@@ -85,12 +85,12 @@ export function TodayView({ locale }: TodayViewProps) {
 
         {/* Side Cards Skeleton */}
         <aside className="space-y-7">
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+          <div className="rounded-[10px] bg-card p-5 space-y-4">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-10 w-full rounded-xl" />
             <Skeleton className="h-10 w-full rounded-xl" />
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+          <div className="rounded-[10px] bg-card p-5 space-y-4">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-12 w-full rounded-xl" />
             <Skeleton className="h-12 w-full rounded-xl" />
@@ -131,7 +131,7 @@ export function TodayView({ locale }: TodayViewProps) {
     <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_350px]">
       <div className="space-y-7">
         {/* Hero Card */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:p-7 shadow-sm">
+        <div className="rounded-[10px] bg-card p-5 lg:p-7">
           <p className="eyebrow">{t("availableToday")}</p>
           <p key={computed.availableToday} className="amount-hero fade-num mt-1">
             {formatMoney(computed.availableToday)}
@@ -237,12 +237,12 @@ export function TodayView({ locale }: TodayViewProps) {
           computed.periodRemaining > 0 &&
           (!state.plan.lastReviewedWeekStart ||
             new Date(state.plan.lastReviewedWeekStart).getTime() < computed.weekStart.getTime()) && (
-            <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 space-y-3 animate-in fade-in slide-in-from-top-2">
+            <div className="rounded-[10px] bg-card p-5 space-y-3 animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-foreground">
                   {t("cycleCompleteTitle", { amount: formatMoney(computed.periodRemaining) })}
                 </p>
-                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary">
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground">
                   {t("cycleEnd")}
                 </span>
               </div>
@@ -278,7 +278,7 @@ export function TodayView({ locale }: TodayViewProps) {
         {/* Quick Add */}
         <section aria-label={t("quickAdd")}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-muted-foreground">{t("quickAdd")}</h2>
+            <h2 className="ios-section-header">{t("quickAdd")}</h2>
             <span className="text-xs text-muted-foreground">{t("oneTapCapture")}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
@@ -311,7 +311,7 @@ export function TodayView({ locale }: TodayViewProps) {
                     }, 500);
                   }}
                   className={cn(
-                    "group flex h-[68px] items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-all active:scale-[0.98]",
+                    "group flex h-[68px] items-center gap-3 rounded-[10px] bg-card p-3 text-left transition-all active:scale-[0.98]",
                     isPending
                       ? "opacity-60 cursor-wait bg-secondary"
                       : "hover:border-primary/40 hover:bg-secondary/60 cursor-pointer"
@@ -359,7 +359,7 @@ export function TodayView({ locale }: TodayViewProps) {
                 <p className="truncate text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
                   {t("custom")}
                 </p>
-                <p className="text-xs text-muted-foreground/70">{t("otherAmount")}</p>
+                <p className="text-xs text-muted-foreground">{t("otherAmount")}</p>
               </div>
             </Link>
           </div>
@@ -368,7 +368,7 @@ export function TodayView({ locale }: TodayViewProps) {
         {/* Latest Activity */}
         <section aria-label={t("latestActivity")}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-muted-foreground">{t("latestActivity")}</h2>
+            <h2 className="ios-section-header">{t("latestActivity")}</h2>
             <Link
               href={`/${locale}/activity`}
               className="flex min-h-11 items-center px-1 text-sm font-semibold text-primary hover:underline"
@@ -382,9 +382,9 @@ export function TodayView({ locale }: TodayViewProps) {
               {t("noActivity")}
             </p>
           ) : (
-            <ul className="divide-y divide-border rounded-2xl border border-border bg-card overflow-hidden">
+            <ul className="ios-list">
               {recentTxs.map((tx) => (
-                <li key={tx.id} className="item-enter flex items-center justify-between px-4 py-3 transition-colors hover:bg-secondary/40">
+                <li key={tx.id} className="item-enter ios-row flex items-center justify-between px-4 py-3 transition-colors hover:bg-secondary/40">
                   <div>
                     <p className="text-sm font-semibold">{tx.label}</p>
                     <p className="text-xs text-muted-foreground">
@@ -407,13 +407,13 @@ export function TodayView({ locale }: TodayViewProps) {
       {/* Side Summary */}
       <aside className="space-y-7">
         <section aria-label={t("protected")}>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("protected")}</h2>
-          <div className="divide-y divide-border rounded-2xl border border-border bg-card">
+          <h2 className="ios-section-header">{t("protected")}</h2>
+          <div className="ios-list">
             {[
               [tPlan("homeFixed"), state.plan.homeFixedMonthly],
               [tPlan("futureFund"), state.plan.futureFundMonthly + state.futureAllocated],
             ].map(([k, v]) => (
-              <div key={k as string} className="flex items-center justify-between px-4 py-3">
+              <div key={k as string} className="ios-row flex items-center justify-between px-4 py-3">
                 <span className="flex items-center gap-2 text-sm">
                   <Lock className="size-4 text-muted-foreground" /> {k}
                 </span>
@@ -423,15 +423,15 @@ export function TodayView({ locale }: TodayViewProps) {
                 </span>
               </div>
             ))}
-            <p className="px-4 py-3 text-xs text-muted-foreground">
+            <p className="ios-row px-4 py-3 text-xs text-muted-foreground">
               {t("protectedNote")}
             </p>
           </div>
         </section>
 
         <section aria-label={t("thisWeek")}>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("thisWeek")}</h2>
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+          <h2 className="ios-section-header">{t("thisWeek")}</h2>
+          <div className="space-y-4 rounded-[10px] bg-card p-4">
             {(["essentials", "fun"] as const).map((e) => {
               const lim = e === "fun" ? state.plan.funLimit : state.plan.essentialsLimit;
               return (
@@ -452,7 +452,7 @@ export function TodayView({ locale }: TodayViewProps) {
         {state.waitList.length > 0 && (
           <Link
             href={`/${locale}/plan/wait-list`}
-            className="block rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
+            className="block rounded-[10px] bg-card p-4 transition-colors hover:bg-secondary"
           >
             <p className="text-sm font-semibold">{t("waitListCount", { count: state.waitList.length })}</p>
             <p className="text-xs text-muted-foreground">{t("waitListReviewPrompt")}</p>
@@ -461,7 +461,7 @@ export function TodayView({ locale }: TodayViewProps) {
 
         <Link
           href={`/${locale}/review`}
-          className="block rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
+          className="block rounded-[10px] bg-card p-4 transition-colors hover:bg-secondary"
         >
           <p className="text-sm font-semibold">{t("weeklyReviewTitle")}</p>
           <p className="text-xs text-muted-foreground">{t("weeklyReviewSub")}</p>

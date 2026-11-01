@@ -71,7 +71,7 @@ export function ReviewView() {
 
   if (isReviewed) {
     return (
-      <div className="max-w-2xl rounded-2xl border border-border bg-card p-10 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in-95">
+      <div className="max-w-2xl rounded-[10px] bg-card p-10 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in-95">
         <LedgerMilestoneSweep />
         <div className="space-y-1.5">
           <h2 className="text-xl font-bold text-foreground">{t("weekBalancedTitle")}</h2>
@@ -101,7 +101,7 @@ export function ReviewView() {
   return (
     <div className="max-w-2xl space-y-7">
       {/* 3-stat breakdown summary banner */}
-      <dl className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card shadow-xs">
+      <dl className="grid grid-cols-3 divide-x divide-border rounded-[10px] bg-card shadow-xs">
         <div className="p-4 sm:p-5">
           <dt className="eyebrow">{t("planned")}</dt>
           <dd className="money mt-1 text-xl sm:text-2xl font-bold text-foreground">
@@ -140,7 +140,7 @@ export function ReviewView() {
 
       {/* Polished Interactive Option Cards */}
       <fieldset className="space-y-3">
-        <legend className="mb-2 text-base font-semibold text-foreground">
+        <legend className="ios-section-header">
           {t("question", { amount: formatMoney(remainder) })}
         </legend>
         <div className="space-y-3">
@@ -151,7 +151,7 @@ export function ReviewView() {
               <label
                 key={opt.id}
                 className={cn(
-                  "relative flex cursor-pointer items-start gap-4 rounded-2xl border p-4 sm:p-5 transition-all duration-150 select-none",
+                  "relative flex cursor-pointer items-start gap-4 rounded-[10px] border p-4 sm:p-5 transition-all duration-150 select-none",
                   isSelected
                     ? "border-primary bg-primary/10 shadow-xs ring-1 ring-primary/40"
                     : "border-border bg-card hover:border-primary/40 hover:bg-secondary/40"

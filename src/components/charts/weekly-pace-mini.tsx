@@ -60,11 +60,11 @@ export function WeeklyPaceMini({ data, locale = "en-KH" }: WeeklyPaceMiniProps) 
       accessibleSummary={accessibleSummary}
       badge={
         data.status === "ON_PLAN" ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-2xs font-semibold text-primary">
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
             <CheckCircle2 className="size-3" /> {t("onPlan")}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-2xs font-semibold text-warning">
+          <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-semibold text-warning">
             <AlertCircle className="size-3" /> {t("pacingAdjusted")}
           </span>
         )
@@ -94,7 +94,7 @@ export function WeeklyPaceMini({ data, locale = "en-KH" }: WeeklyPaceMiniProps) 
             />
             <YAxis
               stroke="var(--chart-muted)"
-              fontSize={10}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => formatMoney(v)}

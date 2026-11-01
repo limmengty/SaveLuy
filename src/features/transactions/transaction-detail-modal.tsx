@@ -166,7 +166,7 @@ export function TransactionDetailModal({
                 <span className="text-3xl font-black font-mono tabular-nums tracking-tight text-foreground">
                   −{primaryFormatted}
                 </span>
-                <span className="text-xs font-mono tabular-nums text-muted-foreground/80">
+                <span className="text-xs font-mono tabular-nums text-muted-foreground">
                   (≈ {alternateFormatted})
                 </span>
               </div>
@@ -195,7 +195,7 @@ export function TransactionDetailModal({
             </div>
 
             {/* Timestamp */}
-            <div className="text-xs text-muted-foreground/90 px-1">
+            <div className="text-xs text-muted-foreground px-1">
               {t("recordedAt", {
                 time: new Date(transaction.createdAt).toLocaleString(dateLocale, {
                   month: "short",
@@ -256,7 +256,7 @@ export function TransactionDetailModal({
                   className="h-11 pl-9 pr-14 font-mono tabular-nums text-base rounded-xl font-semibold"
                   autoFocus
                 />
-                <span className="pointer-events-none absolute right-3 text-xs font-medium text-muted-foreground/70 uppercase">
+                <span className="pointer-events-none absolute right-3 text-xs font-medium text-muted-foreground uppercase">
                   {currency}
                 </span>
               </div>

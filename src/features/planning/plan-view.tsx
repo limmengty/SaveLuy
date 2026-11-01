@@ -12,6 +12,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   History,
   Edit3,
   RotateCcw,
@@ -363,8 +364,8 @@ export function PlanView({ locale }: { locale: string }) {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Weekly Flexible Envelopes */}
         <section aria-label="Flexible weekly envelopes">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("flexibleWeekly")}</h2>
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <h2 className="ios-section-header">{t("flexibleWeekly")}</h2>
+          <div className="ios-list space-y-5 p-5">
             <MoneyField
               key="essentials"
               label={t("essentials")}
@@ -444,8 +445,8 @@ export function PlanView({ locale }: { locale: string }) {
       {/* Monthly Protected Commitments & Perspectives */}
       <div className="space-y-8">
         <section aria-label="Protected monthly commitments">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">{t("protectedMonthly")}</h2>
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <h2 className="ios-section-header">{t("protectedMonthly")}</h2>
+          <div className="ios-list space-y-5 p-5">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="size-4 shrink-0" /> {t("lockedNote")}
             </p>
@@ -490,7 +491,7 @@ export function PlanView({ locale }: { locale: string }) {
         <section aria-label="Scheduled commitments and bills">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-sm font-semibold text-muted-foreground">{t("scheduledCommitments")}</h2>
+              <h2 className="ios-section-header">{t("scheduledCommitments")}</h2>
               {plan.scheduledCommitments && plan.scheduledCommitments.length > 0 && (
                 <span className="inline-flex items-center rounded-full bg-secondary/80 px-2.5 py-0.5 text-[11px] font-medium font-mono tabular-nums text-muted-foreground border border-border/40">
                   {plan.scheduledCommitments.length} · {formatMoney(totalCommitmentsCents, undefined, state.preferences.currency, state.preferences.khrExchangeRate)}/mo
@@ -512,7 +513,7 @@ export function PlanView({ locale }: { locale: string }) {
             </button>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <div className="space-y-4">
             <p className="text-xs text-muted-foreground leading-relaxed flex items-start sm:items-center gap-2">
               <CalendarCheck className="size-4 shrink-0 text-primary mt-0.5 sm:mt-0" />
               <span>{t("scheduledCommitmentsHint")}</span>
@@ -633,7 +634,7 @@ export function PlanView({ locale }: { locale: string }) {
                                 {locale === "km-KH" ? s.km : s.en}
                               </span>
                             </div>
-                            <span className="text-[10px] uppercase font-mono text-muted-foreground px-1.5 py-0.5 rounded bg-secondary/80 shrink-0">
+                            <span className="text-[11px] uppercase font-mono text-muted-foreground px-1.5 py-0.5 rounded bg-secondary/80 shrink-0">
                               {s.category}
                             </span>
                           </button>
@@ -715,7 +716,7 @@ export function PlanView({ locale }: { locale: string }) {
                         </span>
                       }
                       endAdornment={
-                        <span className="text-xs font-medium text-muted-foreground/70 uppercase select-none">
+                        <span className="text-xs font-medium text-muted-foreground uppercase select-none">
                           {state.preferences.currency}
                         </span>
                       }
@@ -756,7 +757,7 @@ export function PlanView({ locale }: { locale: string }) {
                 <p className="text-xs font-medium text-muted-foreground">{t("noCommitments")}</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="ios-list">
                 {plan.scheduledCommitments.map((cmt) => {
                   const altCurrency = state.preferences.currency === "USD" ? "KHR" : "USD";
                   const primaryFmt = formatMoney(cmt.amountCents, undefined, state.preferences.currency, state.preferences.khrExchangeRate);
@@ -765,12 +766,12 @@ export function PlanView({ locale }: { locale: string }) {
                   return (
                     <div
                       key={cmt.id}
-                      className="group flex items-center justify-between p-3 sm:p-3.5 rounded-xl border border-border/70 bg-card hover:border-border transition-all"
+                      className="ios-row ios-row-icon-sep group flex items-center justify-between p-3.5 transition-colors hover:bg-secondary/40"
                     >
                       {/* Left: Day Badge & Info */}
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="flex flex-col items-center justify-center size-11 rounded-xl bg-secondary/80 border border-border/50 shrink-0 font-mono">
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase leading-tight">DAY</span>
+                          <span className="text-[11px] font-bold text-muted-foreground uppercase leading-tight">DAY</span>
                           <span className="text-xs font-black text-foreground tabular-nums leading-tight">
                             {cmt.dueDayOfMonth}
                           </span>
@@ -779,7 +780,7 @@ export function PlanView({ locale }: { locale: string }) {
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-semibold text-foreground truncate">{cmt.label}</p>
                             {cmt.category && (
-                              <span className="hidden sm:inline-flex items-center rounded-md bg-secondary/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground capitalize">
+                              <span className="hidden sm:inline-flex items-center rounded-md bg-secondary/60 px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground capitalize">
                                 {cmt.category}
                               </span>
                             )}
@@ -796,14 +797,14 @@ export function PlanView({ locale }: { locale: string }) {
                           <span className="block font-mono text-sm font-bold text-foreground tabular-nums">
                             {primaryFmt}
                           </span>
-                          <span className="hidden sm:block font-mono text-[10px] text-muted-foreground tabular-nums">
+                          <span className="hidden sm:block font-mono text-[11px] text-muted-foreground tabular-nums">
                             ≈ {altFmt}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => deleteScheduledCommitment(cmt.id)}
-                          className="min-w-[44px] min-h-[44px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-muted-foreground/70 hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all cursor-pointer"
+                          className="min-w-[44px] min-h-[44px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all cursor-pointer"
                           title={t("deleteBillTitle")}
                           aria-label={`Delete ${cmt.label}`}
                         >
@@ -821,7 +822,7 @@ export function PlanView({ locale }: { locale: string }) {
         {/* Income perspective & Real-time Budget Equation */}
         <section aria-label="Income perspective and allocation">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-muted-foreground">{t("perspective")}</h2>
+            <h2 className="ios-section-header">{t("perspective")}</h2>
             <button
               type="button"
               onClick={() => setShowTemplateModal(true)}
@@ -832,7 +833,7 @@ export function PlanView({ locale }: { locale: string }) {
             </button>
           </div>
 
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
+          <div className="ios-list space-y-5 p-5">
             <MoneyField
               key="income"
               label={t("monthlyIncome")}
@@ -851,7 +852,7 @@ export function PlanView({ locale }: { locale: string }) {
                 </span>
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold",
                     feasibility.isOverallocated
                       ? "bg-destructive/15 text-destructive"
                       : "bg-primary/15 text-primary"
@@ -930,9 +931,10 @@ export function PlanView({ locale }: { locale: string }) {
 
         <Link
           href={`/${locale}/plan/wait-list`}
-          className="block rounded-2xl border border-border bg-card p-4 text-sm font-semibold transition-colors hover:bg-secondary"
+          className="ios-list flex items-center justify-between px-4 py-3.5 text-sm font-semibold transition-colors hover:bg-secondary"
         >
-          {t("waitListLink", { count: state.waitList.length })}
+          <span>{t("waitListLink", { count: state.waitList.length })}</span>
+          <ChevronRight className="ios-chevron size-4" aria-hidden="true" />
         </Link>
       </div>
 
@@ -1170,7 +1172,7 @@ export function PlanView({ locale }: { locale: string }) {
 
               return (
                 <div key={cat} className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
                     {catLabel}
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1194,7 +1196,7 @@ export function PlanView({ locale }: { locale: string }) {
                             <span className="block text-xs font-semibold text-foreground truncate">
                               {label}
                             </span>
-                            <span className="text-[10px] text-muted-foreground block">
+                            <span className="text-[11px] text-muted-foreground block">
                               {locale === "km-KH" ? `ថ្ងៃទី ${s.defaultDay}` : `Day ${s.defaultDay}`}
                             </span>
                           </div>

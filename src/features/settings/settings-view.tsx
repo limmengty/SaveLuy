@@ -137,12 +137,12 @@ export function SettingsView() {
     <div className="max-w-2xl space-y-8 pb-12">
       {/* Account & Identity Section */}
       <section aria-label="Account and identity">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        <h2 className="ios-section-header flex items-center gap-2">
           <User className="size-4" /> {t("account")}
         </h2>
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <div className="ios-list">
           {isLoadingAuth ? (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pulse">
+            <div className="ios-row flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 animate-pulse">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="size-2 rounded-full bg-muted" />
@@ -154,7 +154,7 @@ export function SettingsView() {
               <div className="h-9 w-28 rounded-xl bg-muted" />
             </div>
           ) : userEmail ? (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="ios-row flex flex-col sm:flex-row sm:items-center justify-between gap-5 p-4">
               <div className="flex items-center gap-4 min-w-0">
                 {/* Avatar with upload overlay */}
                 <div className="relative group shrink-0">
@@ -208,7 +208,7 @@ export function SettingsView() {
 
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex size-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="inline-flex size-2 rounded-full bg-primary shrink-0" />
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
                       {displayName || t("signedInAs")}
                     </p>
@@ -226,7 +226,7 @@ export function SettingsView() {
               </button>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="ios-row flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">{t("signedInAs")}</p>
                 <p className="text-sm font-semibold text-foreground">{t("authenticatedUser")}</p>
@@ -245,14 +245,16 @@ export function SettingsView() {
 
       {/* Preferences Section: Language & Currency */}
       <section aria-label="Preferences">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        <h2 className="ios-section-header flex items-center gap-2">
           <Globe className="size-4" /> {t("preferences")}
         </h2>
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
+        <div className="ios-list">
           {/* Language Switcher */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Languages className="size-4 text-muted-foreground" />
+          <div className="ios-row ios-row-icon-sep flex flex-col items-stretch gap-2 p-4">
+            <div className="flex items-center gap-3">
+              <span className="ios-icon bg-primary text-primary-foreground">
+                <Languages className="size-4" />
+              </span>
               <label className="text-sm font-medium text-foreground">{t("language")}</label>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -278,9 +280,11 @@ export function SettingsView() {
           </div>
 
           {/* Currency Switcher */}
-          <div className="border-t border-border pt-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Coins className="size-4 text-muted-foreground" />
+          <div className="ios-row ios-row-icon-sep flex flex-col items-stretch gap-2 p-4">
+            <div className="flex items-center gap-3">
+              <span className="ios-icon bg-warning text-warning-foreground">
+                <Coins className="size-4" />
+              </span>
               <label className="text-sm font-medium text-foreground">{t("currency")}</label>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -306,10 +310,12 @@ export function SettingsView() {
           </div>
 
           {/* Khmer Riel Exchange Rate Configuration */}
-          <div className="border-t border-border pt-4 space-y-2">
+          <div className="ios-row ios-row-icon-sep flex flex-col items-stretch gap-2 p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">៛</span>
+              <div className="flex items-center gap-3">
+                <span className="ios-icon bg-secondary text-foreground">
+                  <span className="text-sm font-bold">៛</span>
+                </span>
                 <label className="text-sm font-medium text-foreground">{t("exchangeRate")}</label>
               </div>
               <span className="text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
@@ -352,7 +358,7 @@ export function SettingsView() {
               {/* Custom rate button / input */}
               {isEditingCustomRate ? (
                 <div className="flex flex-col justify-center rounded-xl border border-primary bg-primary/5 p-2 min-h-[64px]">
-                  <span className="text-[10px] font-semibold text-primary mb-1">{t("customRate")} (៛ / $1)</span>
+                  <span className="text-[11px] font-semibold text-primary mb-1">{t("customRate")} (៛ / $1)</span>
                   <div className="flex gap-1.5 items-center">
                     <input
                       type="number"
@@ -413,9 +419,11 @@ export function SettingsView() {
           </div>
 
           {/* Cycle Anchor Switcher */}
-          <div className="border-t border-border pt-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="size-4 text-muted-foreground" />
+          <div className="ios-row ios-row-icon-sep flex flex-col items-stretch gap-2 p-4">
+            <div className="flex items-center gap-3">
+              <span className="ios-icon bg-destructive text-destructive-foreground">
+                <Calendar className="size-4" />
+              </span>
               <label className="text-sm font-medium text-foreground">{t("cycleAnchor")}</label>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -454,9 +462,11 @@ export function SettingsView() {
           </div>
 
           {/* Theme Switcher */}
-          <div className="border-t border-border pt-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Sun className="size-4 text-muted-foreground" />
+          <div className="ios-row ios-row-icon-sep flex flex-col items-stretch gap-2 p-4">
+            <div className="flex items-center gap-3">
+              <span className="ios-icon bg-momentum text-momentum-foreground">
+                <Sun className="size-4" />
+              </span>
               <label className="text-sm font-medium text-foreground">{t("theme")}</label>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -496,12 +506,12 @@ export function SettingsView() {
 
       {/* Voice & Tone preference */}
       <section aria-label="Advisor voice">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        <h2 className="ios-section-header flex items-center gap-2">
           <MessageSquare className="size-4" /> {t("voice")}
         </h2>
-        <div className="space-y-2 rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">{t("voiceDesc")}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <div className="ios-list">
+          <p className="ios-row p-4 text-sm text-muted-foreground">{t("voiceDesc")}</p>
+          <div className="ios-row grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
             {[
               { id: "calm", label: t("calm"), desc: t("calmDesc") },
               { id: "straight", label: t("straight"), desc: t("straightDesc") },
@@ -531,17 +541,17 @@ export function SettingsView() {
 
       {/* Product Principles */}
       <section aria-label="Product principles">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        <h2 className="ios-section-header flex items-center gap-2">
           <Shield className="size-4" /> {t("principles")}
         </h2>
-        <div className="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
-          <p>
+        <div className="ios-list text-sm text-muted-foreground">
+          <p className="ios-row p-4">
             <strong className="text-foreground">{t("p1Title")}</strong> {t("p1Desc")}
           </p>
-          <p>
+          <p className="ios-row p-4">
             <strong className="text-foreground">{t("p2Title")}</strong> {t("p2Desc")}
           </p>
-          <p>
+          <p className="ios-row p-4">
             <strong className="text-foreground">{t("p3Title")}</strong> {t("p3Desc")}
           </p>
         </div>

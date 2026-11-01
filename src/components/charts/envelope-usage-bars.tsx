@@ -45,7 +45,7 @@ export function EnvelopeUsageBars({ envelopes, locale = "en-KH", className }: En
             </div>
 
             {/* Percentage & Total */}
-            <div className="flex items-center justify-between text-2xs text-muted-foreground">
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span>{env.percentageUsed}% of {formatMoney(env.allocatedCents)}</span>
               <Link
                 href={`/${locale}/activity?envelope=${env.envelopeId}`}

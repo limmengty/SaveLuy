@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "A calm daily spending decision system with instant capture and purchase impact checking.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0b0f17",
-    theme_color: "#10b981",
+    background_color: "#f2f2f7",
+    theme_color: "#f2f2f7",
     orientation: "portrait",
     categories: ["finance", "lifestyle", "productivity"],
     icons: [

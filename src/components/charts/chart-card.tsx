@@ -27,7 +27,7 @@ export function ChartCard({
   return (
     <article
       className={cn(
-        "rounded-2xl border border-border bg-card p-5 lg:p-6 shadow-xs flex flex-col justify-between transition-all relative overflow-hidden",
+        "rounded-[10px] bg-card p-5 lg:p-6 flex flex-col justify-between relative overflow-hidden",
         className
       )}
       aria-label={question}

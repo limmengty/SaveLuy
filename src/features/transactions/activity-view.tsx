@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQueryState, parseAsString } from "nuqs";
-import { RotateCcw, Filter, Coffee, Utensils, Bike, Heart, ShoppingBag, Receipt, Undo2 } from "lucide-react";
+import { RotateCcw, ChevronRight, Filter, Coffee, Utensils, Bike, Heart, ShoppingBag, Receipt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { LedgerEmptyActivity } from "@/components/illustrations/ledger-lines";
@@ -150,12 +150,12 @@ export function ActivityView() {
 
           return (
             <section key={day} aria-label={`Activity for ${day}`}>
-              <div className="mb-2 flex justify-between text-xs font-semibold text-muted-foreground">
+              <div className="ios-section-header flex justify-between">
                 <h2>{day}</h2>
                 <span className="money">{formatMoney(dayTotal)}</span>
               </div>
 
-              <ul className="divide-y divide-border/70 rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+              <ul className="ios-list">
                 {txs.map((txItem) => {
                   const Icon = getCategoryIcon(txItem.label, txItem.envelope);
                   const isFun = txItem.envelope === "fun";
@@ -164,25 +164,25 @@ export function ActivityView() {
                     <li
                       key={txItem.id}
                       className={cn(
-                        "item-enter flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-secondary/40",
+                        "item-enter ios-row ios-row-icon-sep flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-secondary/40",
                         txItem.reversed && "bg-secondary/20 opacity-60"
                       )}
                     >
-                      {/* Category Icon Badge */}
+                      {/* Category Icon Badge — iOS solid tinted square */}
                       <div
                         className={cn(
-                          "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-transform",
+                          "ios-icon transition-transform",
                           txItem.reversed
-                            ? "border-border bg-secondary/50 text-muted-foreground"
+                            ? "bg-secondary text-muted-foreground"
                             : isFun
-                              ? "border-warning/30 bg-warning/10 text-warning"
-                              : "border-primary/30 bg-primary/10 text-primary"
+                              ? "bg-warning text-warning-foreground"
+                              : "bg-primary text-primary-foreground"
                         )}
                       >
                         {txItem.reversed ? (
-                          <Undo2 className="size-4.5" />
+                          <Undo2 className="size-4" />
                         ) : (
-                          <Icon className="size-4.5" />
+                          <Icon className="size-4" />
                         )}
                       </div>
 
@@ -196,7 +196,7 @@ export function ActivityView() {
                             {txItem.label}
                           </p>
                           {txItem.reversed && (
-                            <span className="inline-flex shrink-0 items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+                            <span className="inline-flex shrink-0 items-center px-1.5 py-0.2 rounded text-[11px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
                               {t("undone")}
                             </span>
                           )}
@@ -226,11 +226,15 @@ export function ActivityView() {
                       <div className="text-right shrink-0">
                         <span className={cn(
                           "money text-sm font-bold tracking-tight block whitespace-nowrap",
-                          txItem.reversed ? "line-through text-muted-foreground/60" : "text-foreground"
+                          txItem.reversed ? "line-through text-muted-foreground" : "text-foreground"
                         )}>
                           −{formatMoney(txItem.amount)}
                         </span>
                       </div>
+
+                      {!txItem.reversed && (
+                        <ChevronRight className="ios-chevron size-4" aria-hidden="true" />
+                      )}
 
                       {/* Undo Action */}
                       {!txItem.reversed && (
@@ -241,7 +245,7 @@ export function ActivityView() {
                             reverseTransaction(txItem.id);
                             toast(t("undoToast", { label: txItem.label }));
                           }}
-                          className="grid size-9 place-items-center rounded-xl border border-transparent text-muted-foreground/80 hover:text-foreground hover:bg-secondary hover:border-border transition-all cursor-pointer active:scale-95"
+                          className="grid size-9 place-items-center rounded-xl border border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-border transition-all cursor-pointer active:scale-95"
                         >
                           <RotateCcw className="size-4" />
                         </button>

@@ -110,7 +110,7 @@ export function LoginView() {
               </button>
 
               {/* Privacy badge */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="size-4 text-primary shrink-0" />
                 <span>{t("securityBadge")}</span>
               </div>
@@ -133,7 +133,7 @@ export function LoginView() {
       </main>
 
       {/* Footer */}
-      <footer className="container mx-auto max-w-7xl px-6 py-6 text-center text-xs text-muted-foreground/60 border-t border-border/20">
+      <footer className="container mx-auto max-w-7xl px-6 py-6 text-center text-xs text-muted-foreground border-t border-border/20">
         <p>© {new Date().getFullYear()} SaveLuy · Clarity before you spend</p>
       </footer>
     </div>

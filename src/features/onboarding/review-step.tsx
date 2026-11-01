@@ -151,7 +151,7 @@ export function ReviewStep({ locale }: ReviewStepProps) {
           </div>
 
           {/* Allocation Equation Card */}
-          <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <div className="rounded-[10px] bg-card p-4 space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Allocation Equation</h3>
             <div className="space-y-2 text-sm divide-y divide-border/40">
               <div className="flex justify-between py-1">
@@ -205,7 +205,7 @@ export function ReviewStep({ locale }: ReviewStepProps) {
           </div>
 
           {/* Editable Envelopes Section */}
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          <div className="space-y-4 rounded-[10px] bg-card p-5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Weekly Flexible Envelopes</h3>
             <div className="grid grid-cols-2 gap-3.5">
               <div className="space-y-1.5">

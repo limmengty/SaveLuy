@@ -80,7 +80,7 @@ export function TemplateSwitcherModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl border-t sm:border border-border bg-card shadow-2xl overflow-hidden pb-[env(safe-area-inset-bottom,0px)]"
+        className="relative w-full max-w-xl max-h-[92dvh] flex flex-col rounded-t-[12px] sm:rounded-3xl border-t sm:border border-border bg-card shadow-2xl overflow-hidden pb-[env(safe-area-inset-bottom,0px)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="template-modal-title"
@@ -144,7 +144,7 @@ export function TemplateSwitcherModal({
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm font-bold text-foreground">{tpl.title}</span>
                           {tpl.badge && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary">
                               {tpl.badge}
                             </span>
                           )}
@@ -157,15 +157,15 @@ export function TemplateSwitcherModal({
                   {/* Envelope Breakdown Preview */}
                   <div className="grid grid-cols-3 gap-2 border-t border-border/50 pt-3 text-xs">
                     <div className="rounded-xl bg-secondary/60 p-2 text-center">
-                      <span className="block text-[10px] text-muted-foreground font-medium">Protected /mo</span>
+                      <span className="block text-[11px] text-muted-foreground font-medium">Protected /mo</span>
                       <span className="money font-bold text-foreground">{formatMoney(monthlyProtected)}</span>
                     </div>
                     <div className="rounded-xl bg-secondary/60 p-2 text-center">
-                      <span className="block text-[10px] text-muted-foreground font-medium">Flexible /wk</span>
+                      <span className="block text-[11px] text-muted-foreground font-medium">Flexible /wk</span>
                       <span className="money font-bold text-foreground">{formatMoney(weeklyFlexible)}</span>
                     </div>
                     <div className="rounded-xl bg-secondary/60 p-2 text-center">
-                      <span className="block text-[10px] text-muted-foreground font-medium">Buffer /mo</span>
+                      <span className="block text-[11px] text-muted-foreground font-medium">Buffer /mo</span>
                       <span className="money font-bold text-primary">+{formatMoney(tpl.unallocatedBuffer)}</span>
                     </div>
                   </div>

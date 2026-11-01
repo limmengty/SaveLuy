@@ -353,7 +353,7 @@ export function CheckView({ locale }: { locale: string }) {
       {/* Left Column: Purchase Entry, Presets, Split Calculator */}
       <div className="space-y-7">
         {/* Purchase Amount Card */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:p-6 shadow-sm space-y-5">
+        <div className="rounded-[10px] bg-card p-5 lg:p-6 shadow-sm space-y-5">
           {/* Amount Box with Integrated Currency Switcher */}
           <div className="rounded-xl border border-border/80 bg-secondary/25 p-5 relative">
             {/* Header row inside card */}
@@ -404,7 +404,7 @@ export function CheckView({ locale }: { locale: string }) {
                   onChange={(e) => handleInputChange(e.target.value)}
                   placeholder="0"
                   className={cn(
-                    "max-w-[240px] sm:max-w-xs text-center bg-transparent border-none outline-none font-black tracking-tight text-foreground transition-all placeholder:text-muted-foreground/30 focus:ring-0 p-0 selection:bg-primary/20",
+                    "max-w-[240px] sm:max-w-xs text-center bg-transparent border-none outline-none font-black tracking-tight text-foreground transition-all placeholder:text-placeholder focus:ring-0 p-0 selection:bg-primary/20",
                     amount >= 10000000
                       ? "text-3xl sm:text-4xl"
                       : amount >= 100000
@@ -422,7 +422,7 @@ export function CheckView({ locale }: { locale: string }) {
                 ) : (
                   <span>{formatMoney(amount, undefined, "USD")}</span>
                 )}
-                <span className="text-xs text-muted-foreground/70">(@{exchangeRate.toLocaleString()} ៛/$)</span>
+                <span className="text-xs text-muted-foreground">(@{exchangeRate.toLocaleString()} ៛/$)</span>
               </p>
             </div>
 
@@ -492,7 +492,7 @@ export function CheckView({ locale }: { locale: string }) {
                 value={customLabel}
                 onChange={(e) => setCustomLabel(e.target.value)}
                 placeholder={t("notePlaceholder")}
-                className="w-full px-3.5 py-2.5 pr-9 rounded-xl border border-border/80 bg-card text-foreground text-sm placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary outline-hidden"
+                className="w-full px-3.5 py-2.5 pr-9 rounded-xl border border-border/80 bg-card text-foreground text-sm placeholder:text-placeholder focus:ring-1 focus:ring-primary outline-hidden"
               />
               {customLabel && (
                 <button
@@ -582,7 +582,7 @@ export function CheckView({ locale }: { locale: string }) {
         </div>
 
         {/* Quick Suggestions Card (Show a few + Action for More / See More) */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:p-6 shadow-sm space-y-3">
+        <div className="rounded-[10px] bg-card p-5 lg:p-6 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -643,7 +643,7 @@ export function CheckView({ locale }: { locale: string }) {
         </div>
 
         {/* Split Cash & Change Calculator Section */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-3">
+        <div className="rounded-[10px] bg-card p-5 shadow-sm space-y-3">
           <button
             type="button"
             onClick={() => setSplitOpen(!splitOpen)}
@@ -669,7 +669,7 @@ export function CheckView({ locale }: { locale: string }) {
             <div className="pt-3 border-t border-border/80 space-y-3 animate-in fade-in">
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase">
                     {t("paidAmount")} (USD)
                   </label>
                   <input
@@ -682,7 +682,7 @@ export function CheckView({ locale }: { locale: string }) {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase">
                     {t("paidAmount")} (KHR)
                   </label>
                   <input
@@ -698,7 +698,7 @@ export function CheckView({ locale }: { locale: string }) {
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase">
                     {t("changeReturned")} (USD)
                   </label>
                   <input
@@ -711,7 +711,7 @@ export function CheckView({ locale }: { locale: string }) {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase">
                     {t("changeReturned")} (KHR)
                   </label>
                   <input
@@ -756,7 +756,7 @@ export function CheckView({ locale }: { locale: string }) {
               <s.icon className="size-4" />
               <span>{s.label}</span>
             </span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
               {t("simulatorTitle")}
             </span>
           </div>
@@ -776,7 +776,7 @@ export function CheckView({ locale }: { locale: string }) {
                 <dd className="money text-base font-black text-foreground mt-0.5">
                   {formatMoney(Math.max(0, computed.availableToday - amount))}
                 </dd>
-                <span className="text-[10px] text-muted-foreground/80 block mt-0.5">
+                <span className="text-[11px] text-muted-foreground block mt-0.5">
                   {t("startsAt", { amount: formatMoney(computed.availableToday) })}
                 </span>
               </div>
@@ -786,7 +786,7 @@ export function CheckView({ locale }: { locale: string }) {
                 <dd className="money text-base font-black text-foreground mt-0.5">
                   {formatMoney(nextDaily)}/day
                 </dd>
-                <span className="text-[10px] text-muted-foreground/80 block mt-0.5">
+                <span className="text-[11px] text-muted-foreground block mt-0.5">
                   {t("throughEndOfWeek")}
                 </span>
               </div>
@@ -861,7 +861,7 @@ export function CheckView({ locale }: { locale: string }) {
       {/* Responsive Presets Catalog: Dialog on Desktop, Bottom Sheet on Mobile */}
       {mobile ? (
         <Sheet open={presetsDialogOpen} onOpenChange={setPresetsDialogOpen}>
-          <SheetContent side="bottom" className="max-h-[85dvh] rounded-t-3xl border-border bg-card p-0 flex flex-col">
+          <SheetContent side="bottom" className="max-h-[85dvh] rounded-t-[12px] border-border bg-card p-0 flex flex-col">
             <div className="flex justify-center pt-3 pb-1">
               <span className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
             </div>

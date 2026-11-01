@@ -10,10 +10,10 @@ test.describe("SaveLuy Authentication & Guard Tests", () => {
     await expect(page.getByRole("button", { name: /Continue with Google/i })).toBeVisible();
   });
 
-  test("Login page displays secure user-scoped badge and brand principles", async ({ page }) => {
+  test("Login page displays privacy badge and brand promise", async ({ page }) => {
     await page.goto("/en-KH/login");
-    await expect(page.getByText(/Secure user-scoped session/i)).toBeVisible();
-    await expect(page.getByText(/No ads\. No data reselling\./i)).toBeVisible();
+    await expect(page.getByText(/Private & encrypted/i)).toBeVisible();
+    await expect(page.getByText(/No debt tracking/i)).toBeVisible();
   });
 
   test("Public callback route safely handles missing OAuth codes without crash", async ({ page }) => {

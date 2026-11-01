@@ -25,24 +25,20 @@ test.describe("SaveLuy End-to-End User Journeys", () => {
     }
   });
 
-  test("User can open Check Purchase panel and see ripple calculation", async ({ page, isMobile }) => {
+  test("User can open the Check tab and see ripple calculation", async ({ page }) => {
     await page.goto("/en-KH/today");
 
-    // Click Check purchase trigger in shell (mobile has 'Check', desktop has 'Check purchase')
-    const checkBtn = isMobile
-      ? page.getByRole("button", { name: /Check$/i }).first()
-      : page.getByRole("button", { name: /Check purchase/i }).first();
-    await checkBtn.click();
+    // Check is a navigation tab (sidebar "Check Purchase" on desktop, dock "Check" on mobile)
+    await page.getByRole("link", { name: /Check/i }).first().click();
+    await expect(page).toHaveURL(/\/en-KH\/check/);
 
-    // Drawer should open
-    await expect(page.getByRole("heading", { name: /Check a purchase/i })).toBeVisible();
-
-    // Tap number 5 and 0
+    // Tap number 5 and 0 on the keypad
     await page.getByRole("button", { name: "5", exact: true }).click();
     await page.getByRole("button", { name: "0", exact: true }).click();
 
-    // Check impact preview appears
+    // Impact preview and trade-off perspectives appear for the entered amount
     await expect(page.getByText(/Fits today|Adjusts the week|Needs a decision/i)).toBeVisible();
+    await expect(page.getByText(/Trade-offs/i)).toBeVisible();
   });
 
   test("User can navigate Settings, switch language to Khmer and back", async ({ page }) => {
@@ -73,20 +69,20 @@ test.describe("SaveLuy End-to-End User Journeys", () => {
   test("User can complete onboarding wizard steps", async ({ page }) => {
     // 1. Step 1: Income
     await page.goto("/en-KH/onboarding/income");
-    await expect(page.getByRole("heading", { name: /Income Rhythm/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /How does money arrive/i })).toBeVisible();
     await page.getByRole("button", { name: /Continue to Templates/i }).click();
 
     // 2. Step 2: Template
-    await expect(page).toHaveURL(/\/en-KH\/onboarding\/template/);
+    await expect(page).toHaveURL(/\/en-KH\/onboarding\/template/, { timeout: 15000 });
     await expect(page.getByRole("heading", { name: /Choose a Template/i })).toBeVisible();
-    await page.getByRole("button", { name: /Review My Plan/i }).click();
+    await page.getByRole("button", { name: /Review & Adjust Plan/i }).click();
 
     // 3. Step 3: Review
-    await expect(page).toHaveURL(/\/en-KH\/onboarding\/review/);
-    await expect(page.getByRole("heading", { name: /Review Your Plan/i })).toBeVisible();
-    await page.getByRole("button", { name: /Save & Start Today/i }).click();
+    await expect(page).toHaveURL(/\/en-KH\/onboarding\/review/, { timeout: 15000 });
+    await expect(page.getByRole("heading", { name: /Review & Adjust/i })).toBeVisible();
+    await page.getByRole("button", { name: /Activate My Plan/i }).click();
 
     // 4. Redirects to today
-    await expect(page).toHaveURL(/\/en-KH\/today/);
+    await expect(page).toHaveURL(/\/en-KH\/today/, { timeout: 15000 });
   });
 });

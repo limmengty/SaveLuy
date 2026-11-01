@@ -7,7 +7,7 @@ function ThemeColorMetaSync() {
   const { resolvedTheme } = useTheme();
 
   React.useEffect(() => {
-    const color = resolvedTheme === "light" ? "#fafaf8" : "#171c24";
+    const color = resolvedTheme === "light" ? "#f2f2f7" : "#000000";
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement("meta");

@@ -113,7 +113,7 @@ export function WaitListView() {
       )}
 
       {/* Header and Optional Push Reminder Prompt */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+      <div className="ios-section-header flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="size-4 shrink-0 text-primary" />
           <span>{t("headerNote")}</span>
@@ -129,12 +129,12 @@ export function WaitListView() {
         )}
       </div>
 
-      <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
+      <ul className="ios-list">
         {state.waitList.map((item) => {
           const isReadyToReview = new Date(item.unlockAt) <= new Date();
 
           return (
-            <li key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
+            <li key={item.id} className="ios-row flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
               <div className="space-y-0.5">
                 <p className="text-sm font-bold text-foreground">{item.label}</p>
                 <p className="text-xs text-muted-foreground">

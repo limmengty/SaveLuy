@@ -1,6 +1,21 @@
 import type { ReactNode } from "react";
+import { JetBrains_Mono, Kantumruy_Pro } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import "./globals.css";
+import "./style.css";
+
+const fontKhmer = Kantumruy_Pro({
+  subsets: ["khmer", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-khmer",
+  display: "swap",
+});
+
+const fontMonoData = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono-data",
+  display: "swap",
+});
 
 export const metadata = {
   title: "SaveLuy — Know what you can safely spend today.",
@@ -19,14 +34,12 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafaf8" },
-    { media: "(prefers-color-scheme: dark)", color: "#171c24" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -37,13 +50,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap"
-          rel="stylesheet"
-        />
-
         {/* iOS Startup Image links for zero-white-screen PWA launch */}
         <link
           rel="apple-touch-startup-image"
@@ -61,8 +67,8 @@ export default function RootLayout({
           href="/icon.svg"
         />
       </head>
-      <body className="font-sans antialiased bg-background text-foreground overflow-hidden selection:bg-primary/20 selection:text-primary">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <body className={`${fontKhmer.variable} ${fontMonoData.variable} font-sans antialiased bg-background text-foreground overflow-hidden selection:bg-primary/20 selection:text-primary`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>

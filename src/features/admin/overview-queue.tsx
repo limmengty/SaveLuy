@@ -119,7 +119,7 @@ export function OverviewQueue() {
           <div
             key={item.id}
             className={cn(
-              "rounded-2xl border border-border bg-card p-5 transition-all shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4",
+              "rounded-[10px] bg-card p-5 transition-all shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4",
               item.status === "resolved" && "opacity-50"
             )}
           >

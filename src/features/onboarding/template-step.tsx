@@ -138,16 +138,16 @@ export function TemplateStep({ locale }: TemplateStepProps) {
                     {/* Breakdown table */}
                     <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-3 text-xs">
                       <div className="rounded-xl bg-secondary/50 p-2 text-center">
-                        <span className="block text-muted-foreground text-[10px] font-semibold uppercase">Protected</span>
+                        <span className="block text-muted-foreground text-[11px] font-semibold uppercase">Protected</span>
                         <span className="money font-bold text-foreground">{formatMoney(monthlyProtected)}/mo</span>
                       </div>
                       <div className="rounded-xl bg-secondary/50 p-2 text-center">
-                        <span className="block text-muted-foreground text-[10px] font-semibold uppercase">Flexible</span>
+                        <span className="block text-muted-foreground text-[11px] font-semibold uppercase">Flexible</span>
                         <span className="money font-bold text-foreground">{formatMoney(weeklyFlexible)}/wk</span>
                       </div>
                       <div className="rounded-xl bg-secondary/50 p-2 text-center">
-                        <span className="block text-muted-foreground text-[10px] font-semibold uppercase">Buffer</span>
-                        <span className="money font-bold text-emerald-500">+{formatMoney(tpl.unallocatedBuffer)}</span>
+                        <span className="block text-muted-foreground text-[11px] font-semibold uppercase">Buffer</span>
+                        <span className="money font-bold text-primary">+{formatMoney(tpl.unallocatedBuffer)}</span>
                       </div>
                     </div>
                   </label>

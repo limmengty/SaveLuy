@@ -4,7 +4,7 @@ export default function AppLoading() {
   return (
     <div className="space-y-6 animate-pulse max-w-6xl mx-auto w-full">
       {/* Hero Card Skeleton */}
-      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+      <div className="rounded-[10px] bg-card p-5 space-y-4">
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-12 w-44" />
         <Skeleton className="h-4 w-32" />

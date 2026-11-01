@@ -68,7 +68,7 @@ export function ProtectedMoneyChart({ plan, futureAllocated }: ProtectedMoneyCha
             />
             <YAxis
               stroke="var(--chart-muted)"
-              fontSize={10}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => formatMoney(v)}

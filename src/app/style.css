@@ -1,0 +1,535 @@
+@import "tailwindcss";
+
+/*
+  Design system: Apple HIG-aligned ("Grouped Ledger").
+  Semantic roles mirror iOS dynamic system colors (systemGroupedBackground tiers,
+  label ladder, separator, systemFill). Reference values from
+  .agents/skills/apple-design/references/hig/color.md; the emerald app tint is kept
+  as the brand accent per branding.md.
+*/
+@layer base {
+  :root {
+    --radius: 0.75rem;
+
+    /* Backgrounds — systemGroupedBackground tiers (light) */
+    --background: #f2f2f7;
+    --card: #ffffff;
+    --card-tertiary: #f2f2f7;
+    --popover: #ffffff;
+
+    /* Foregrounds — label ladder (light) */
+    --foreground: #000000;
+    --label: #000000;
+    --card-foreground: #000000;
+    --popover-foreground: #000000;
+    --muted-foreground: #6e6e73; /* contrast-adjusted secondaryLabel */
+    --subtle: rgba(60, 60, 67, 0.3); /* tertiaryLabel */
+    --quaternary-label: rgba(60, 60, 67, 0.18);
+    --placeholder: #6e6e73;
+    --link: #0066cc;
+
+    /* Fills — systemFill family (light) */
+    --secondary: rgba(120, 120, 128, 0.16);
+    --secondary-foreground: #000000;
+    --muted: rgba(120, 120, 128, 0.16);
+    --accent: rgba(120, 120, 128, 0.12);
+    --accent-foreground: #000000;
+
+    /* App tint (accent) — kept emerald; darkened to pass 4.5:1 on light */
+    --primary: oklch(0.48 0.13 162);
+    --primary-foreground: #ffffff;
+    --ring: oklch(0.48 0.13 162);
+
+    /* Status — Apple system colors; light variants darkened for text contrast */
+    --destructive: #d92a1c; /* systemRed, increased-contrast light variant */
+    --destructive-foreground: #ffffff;
+    --warning: #b25e09; /* systemOrange, increased-contrast light variant */
+    --warning-foreground: #ffffff;
+    --momentum: #5856d6; /* systemIndigo */
+    --success: oklch(0.48 0.13 162);
+    --success-foreground: #ffffff;
+    --momentum-foreground: #ffffff;
+    --info: #0057ad;
+    --info-foreground: #ffffff;
+
+    /* Separators */
+    --border: rgba(60, 60, 67, 0.29); /* separator (light) */
+    --separator-opaque: #c6c6c8; /* opaqueSeparator (light) */
+    --input: rgba(60, 60, 67, 0.29);
+
+    /* Charts — Apple system hues, tuned for visible series on grouped surfaces */
+    --chart-1: oklch(0.48 0.13 162);
+    --chart-2: #0066cc; /* blue */
+    --chart-3: #5856d6; /* indigo */
+    --chart-4: #c93400; /* orange */
+    --chart-5: #007b83; /* teal */
+    --chart-actual: oklch(0.48 0.13 162);
+    --chart-plan: #76767a; /* contrast-safe systemGray */
+    --chart-protected: #0076a8; /* systemCyan family */
+    --chart-warning: #c93400;
+    --chart-danger: #d92a1c;
+    --chart-muted: #6e6e73; /* contrast-safe systemGray */
+    --chart-grid: #d1d1d6; /* systemGray4 */
+
+    /* Sidebar (desktop) */
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: oklch(0.48 0.13 162);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgba(120, 120, 128, 0.14);
+    --sidebar-accent-foreground: #000000;
+    --sidebar-border: rgba(60, 60, 67, 0.2);
+    --sidebar-ring: oklch(0.48 0.13 162);
+
+    /* Functional-layer material (Liquid Glass approximation for web) */
+    --glass-bg: rgba(249, 249, 251, 0.72);
+    --glass-border: rgba(60, 60, 67, 0.18);
+    --glass-edge: rgba(255, 255, 255, 0.35);
+
+    /* Shared geometry, elevation, and timing */
+    --space-unit: 4px;
+    --touch-target: 44px;
+    --control-target-min: 28px;
+    --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --elevation-popover: 0 8px 28px rgba(0, 0, 0, 0.16);
+    --elevation-modal: 0 16px 48px rgba(0, 0, 0, 0.2);
+    --motion-fast: 120ms;
+    --motion-standard: 200ms;
+    --motion-emphasis: 280ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Type scale — iOS Dynamic Type "Large (default)", typography.md */
+    --text-body: 17px;
+    --text-callout: 16px;
+    --text-subhead: 15px;
+    --text-footnote: 13px;
+    --text-caption: 12px;
+    --text-title3: 20px;
+    --text-title2: 22px;
+    --text-title1: 28px;
+    --text-large-title: 34px;
+  }
+
+  .dark {
+    --background: #000000; /* systemGroupedBackground (dark, base) */
+    --card: #1c1c1e; /* secondarySystemGroupedBackground (dark) */
+    --card-tertiary: #2c2c2e; /* tertiarySystemGroupedBackground (dark) */
+    --popover: #2c2c2e;
+
+    --foreground: #ffffff; /* label (dark) */
+    --label: #ffffff;
+    --card-foreground: #ffffff;
+    --popover-foreground: #ffffff;
+    --muted-foreground: rgba(235, 235, 245, 0.6); /* secondaryLabel */
+    --subtle: rgba(235, 235, 245, 0.3); /* tertiaryLabel */
+    --quaternary-label: rgba(235, 235, 245, 0.16);
+    --placeholder: #98989d;
+    --link: #409cff;
+
+    --secondary: rgba(120, 120, 128, 0.32);
+    --secondary-foreground: #ffffff;
+    --muted: rgba(120, 120, 128, 0.32);
+    --accent: rgba(120, 120, 128, 0.24);
+    --accent-foreground: #ffffff;
+
+    --primary: oklch(0.78 0.14 162);
+    --primary-foreground: oklch(0.16 0.03 162);
+    --ring: oklch(0.78 0.14 162);
+
+    --destructive: #ff453a; /* systemRed (dark) */
+    --destructive-foreground: #000000;
+    --warning: #ff9f0a; /* systemOrange (dark) */
+    --warning-foreground: #000000;
+    --momentum: #5e5ce6; /* systemIndigo (dark) */
+    --success: oklch(0.78 0.14 162);
+    --success-foreground: oklch(0.16 0.03 162);
+    --momentum-foreground: #ffffff;
+    --info: #0a84ff;
+    --info-foreground: #000000;
+
+    --border: rgba(84, 84, 88, 0.65); /* separator (dark) */
+    --separator-opaque: #38383a; /* opaqueSeparator (dark) */
+    --input: rgba(84, 84, 88, 0.65);
+
+    --chart-1: oklch(0.78 0.14 162);
+    --chart-2: #0a84ff;
+    --chart-3: #5e5ce6;
+    --chart-4: #ff9f0a;
+    --chart-5: #40c8e0;
+    --chart-actual: oklch(0.78 0.14 162);
+    --chart-plan: #77777c;
+    --chart-protected: #64d2ff;
+    --chart-warning: #ff9f0a;
+    --chart-danger: #ff453a;
+    --chart-muted: #98989d;
+    --chart-grid: #38383a;
+
+    --sidebar: #1c1c1e;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: oklch(0.78 0.14 162);
+    --sidebar-primary-foreground: oklch(0.16 0.03 162);
+    --sidebar-accent: rgba(120, 120, 128, 0.32);
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: rgba(84, 84, 88, 0.5);
+    --sidebar-ring: oklch(0.78 0.14 162);
+
+    --glass-bg: rgba(18, 18, 20, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-edge: rgba(255, 255, 255, 0.12);
+
+    --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.28);
+    --elevation-popover: 0 8px 28px rgba(0, 0, 0, 0.48);
+    --elevation-modal: 0 16px 48px rgba(0, 0, 0, 0.56);
+  }
+
+  /* Increase Contrast: opaque, stronger separators and fills */
+  @media (prefers-contrast: more) {
+    :root {
+      --border: #767680;
+      --input: #767680;
+      --muted-foreground: #3c3c43;
+      --subtle: #48484a;
+      --quaternary-label: #636366;
+      --placeholder: #48484a;
+      --link: #004c99;
+      --info: #003f83;
+      --secondary: #d8d8dc;
+      --muted: #d8d8dc;
+      --accent: #d0d0d4;
+      --glass-bg: #ffffff;
+      --glass-border: #767680;
+      --chart-grid: #767680;
+    }
+    .dark {
+      --border: #98989d;
+      --input: #98989d;
+      --muted-foreground: #ebebf5;
+      --subtle: #d1d1d6;
+      --quaternary-label: #aeaeb2;
+      --placeholder: #aeaeb2;
+      --link: #80c7ff;
+      --info: #72baff;
+      --secondary: #3a3a3c;
+      --muted: #3a3a3c;
+      --accent: #48484a;
+      --glass-bg: #000000;
+      --glass-border: #98989d;
+      --chart-grid: #98989d;
+    }
+  }
+
+  * {
+    border-color: var(--border);
+  }
+  html {
+    scroll-padding-bottom: 6rem;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family:
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, var(--font-khmer, "Kantumruy Pro"), sans-serif;
+    font-size: var(--text-body);
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  :lang(km),
+  .font-khmer {
+    font-family: var(--font-khmer, "Kantumruy Pro"), -apple-system, sans-serif;
+    line-height: 1.72;
+    letter-spacing: 0.012em;
+  }
+  .money {
+    font-family:
+      var(--font-mono-data, "JetBrains Mono"), ui-monospace, SFMono-Regular,
+      Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Remove distracting number input spinner arrows */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@theme inline {
+  /* Apple-style radii: fewer, softer; cards ≈10–14, sheets ≈18 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 18px;
+  --radius-4xl: 24px;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, var(--font-khmer, "Kantumruy Pro"), sans-serif;
+  --font-mono:
+    var(--font-mono-data, "JetBrains Mono"), ui-monospace, SFMono-Regular,
+    Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-label: var(--label);
+  --color-label-tertiary: var(--subtle);
+  --color-label-quaternary: var(--quaternary-label);
+  --color-placeholder: var(--placeholder);
+  --color-link: var(--link);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-momentum: var(--momentum);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-momentum-foreground: var(--momentum-foreground);
+  --color-subtle: var(--subtle);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@utility money {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hero number — rem-based so it scales with the user's text setting */
+@utility amount-hero {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-size: clamp(3rem, 2.5rem + 2vw, 3.5rem);
+  line-height: 1.08;
+  font-weight: 700;
+}
+
+@utility eyebrow {
+  font-size: var(--text-footnote);
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+/*
+  iOS inset-grouped list primitives (HIG › lists-and-tables, mobile):
+  rounded grouped container, 44pt rows, hairline separators inset to the
+  text leading edge, gray footnote section headers, solid tinted icon
+  squares, tertiary-label disclosure chevrons.
+*/
+@utility ios-list {
+  background-color: var(--card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+@utility ios-row {
+  position: relative;
+  min-height: 44px;
+  & + &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--ios-sep-inset, 16px);
+    right: 0;
+    height: 1px;
+    background-color: var(--separator-opaque);
+  }
+}
+
+/* Rows whose leading element is an icon square indent the separator past it */
+@utility ios-row-icon-sep {
+  --ios-sep-inset: 60px;
+}
+
+@utility ios-section-header {
+  font-size: var(--text-footnote);
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding-inline: 16px;
+  margin-bottom: 6px;
+}
+
+@utility ios-icon {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+@utility ios-chevron {
+  color: var(--subtle);
+  flex-shrink: 0;
+}
+
+@utility fade-num {
+  animation: fadeNum var(--motion-standard) var(--ease-emphasized);
+}
+
+@utility page-in {
+  animation: pageIn var(--motion-emphasis) var(--ease-emphasized);
+}
+
+@utility card-pop {
+  transition: transform var(--motion-fast) var(--ease-emphasized), background-color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+@utility card-interactive {
+  transition: transform var(--motion-fast) var(--ease-emphasized), border-color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard);
+  &:hover {
+    background-color: var(--accent);
+  }
+  &:active {
+    transform: scale(0.985);
+  }
+}
+
+@utility elevation-popover {
+  box-shadow: var(--elevation-popover);
+}
+
+@utility elevation-modal {
+  box-shadow: var(--elevation-modal);
+}
+
+@utility item-enter {
+  animation: itemEnter var(--motion-standard) var(--ease-emphasized);
+}
+
+@utility accordion-down {
+  animation: accordionDown var(--motion-emphasis) var(--ease-emphasized);
+}
+
+@utility safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility safe-bottom-scroll {
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+/*
+  Functional-layer material (liquid-glass.md › Cross-platform translation):
+  backdrop blur + saturation boost + translucent fill + hairline border.
+  Content scrolls beneath; glass stays off the content layer.
+*/
+@utility bar-glass {
+  background-color: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge);
+}
+
+@utility glass-dock {
+  background-color: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-top: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 0 var(--glass-edge);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bar-glass,
+  .glass-dock {
+    background-color: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@keyframes fadeNum {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemEnter {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes accordionDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  /* Reduced motion still needs opacity/color feedback — only strip movement */
+  * {
+    transition-property: opacity, color, background-color, box-shadow !important;
+  }
+}

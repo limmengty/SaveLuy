@@ -154,10 +154,10 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
           <Link
             href={`/${locale}/check`}
             className={cn(
-              "my-2 flex h-11 items-center gap-3 rounded-xl px-3 font-semibold transition-all shadow-sm active:scale-[0.98]",
+              "my-2 flex h-11 items-center gap-3 rounded-xl px-3 font-semibold transition-colors",
               isCheckActive
-                ? "bg-primary text-primary-foreground shadow-primary/25 ring-2 ring-primary/40 ring-offset-2 ring-offset-sidebar"
-                : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-primary/10"
+                ? "bg-primary text-primary-foreground"
+                : "text-primary hover:bg-sidebar-accent"
             )}
           >
             <Calculator className="size-5" />
@@ -217,16 +217,16 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
       </aside>
 
       {/* Main Column */}
-      <div className="flex flex-1 flex-col min-h-0 lg:pl-[232px] xl:pl-[248px]">
-        {/* Unified Top Contextual Header with safe-area-inset-top */}
-        <header className="shrink-0 z-20 border-b border-border/80 header-solid safe-top px-4 md:px-6 lg:px-8">
+      <div className="relative flex flex-1 min-h-0 flex-col lg:pl-[232px] xl:pl-[248px]">
+        {/* Unified Top Contextual Header — content scrolls beneath the glass */}
+        <header className="absolute inset-x-0 top-0 shrink-0 z-20 border-b border-[var(--glass-border)] bar-glass safe-top px-4 md:px-6 lg:px-8">
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 lg:h-16">
             {/* Left: Brand mark on mobile + view title */}
             <div className="flex items-center gap-2.5 min-w-0">
               <Link href={`/${locale}/today`} className="lg:hidden shrink-0 flex items-center" aria-label="SaveLuy Home">
                 <SaveLuyMark size={26} />
               </Link>
-              <h1 className="truncate text-lg font-bold tracking-tight text-foreground lg:text-[24px]">
+              <h1 className="truncate text-[28px] leading-[34px] font-bold tracking-[-0.022em] text-foreground lg:text-[34px] lg:leading-[41px]">
                 {displayTitle}
               </h1>
             </div>
@@ -238,12 +238,12 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
                   className={cn(
                     "flex items-center gap-1.5 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full border transition-all",
                     !isOnline
-                      ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                      ? "border-warning/40 bg-warning/10 text-warning"
                       : "border-primary/40 bg-primary/10 text-primary"
                   )}
                   title={!isOnline ? "Working offline. Transactions are queued safely." : "Syncing queued mutations"}
                 >
-                  <span className={cn("size-1.5 rounded-full", !isOnline ? "bg-amber-500 animate-pulse" : "bg-primary")} />
+                  <span className={cn("size-1.5 rounded-full", !isOnline ? "bg-warning" : "bg-primary")} />
                   <span>{!isOnline ? `${t("offline")}${offlineCount > 0 ? ` (${offlineCount})` : ""}` : t("syncing")}</span>
                 </span>
               )}
@@ -279,7 +279,7 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         {/* ScrollRoot: The SINGLE Vertical Scroller */}
         <main
           id="app-scroll-root"
-          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4 md:px-6 md:pt-6 lg:px-8 lg:pt-8 pb-6 focus:outline-none"
+          className="flex-1 overflow-y-auto overscroll-y-contain px-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] md:px-6 lg:px-8 lg:pt-[calc(6rem+env(safe-area-inset-top,0px))] pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-8 focus:outline-none"
         >
           <div className="mx-auto max-w-6xl">
             {children}
@@ -289,31 +289,18 @@ export function AppShell({ title, action, children, locale }: AppShellProps) {
         {/* Mobile Restrained Bottom Dock */}
         <nav
           aria-label="Main Navigation"
-          className="shrink-0 z-30 glass-dock safe-bottom lg:hidden shadow-lg shadow-black/5"
+          className="absolute inset-x-0 bottom-0 z-30 glass-dock safe-bottom lg:hidden"
         >
         <div className="mx-auto grid h-14 max-w-xl grid-cols-5 items-center px-1">
           <TabLink {...main[0]} active={isActive(main[0].to)} />
           <TabLink {...main[1]} active={isActive(main[1].to) || isActive(`/${locale}/plan/wait-list`)} />
 
-          <Link
-            href={`/${locale}/check`}
-            aria-label={t("check")}
-            className="flex flex-col items-center justify-center -mt-3 text-xs font-semibold cursor-pointer active:scale-95 transition-transform"
-          >
-            <span
-              className={cn(
-                "grid size-12 place-items-center rounded-2xl text-primary-foreground border-2 border-background transition-all",
-                isCheckActive
-                  ? "bg-primary shadow-lg shadow-primary/35 ring-2 ring-primary ring-offset-2 ring-offset-background scale-105"
-                  : "bg-primary shadow-md shadow-primary/25"
-              )}
-            >
-              <Calculator className="size-5" />
-            </span>
-            <span className={cn("text-[10px] font-bold mt-0.5", isCheckActive ? "text-primary" : "text-foreground")}>
-              {t("check")}
-            </span>
-          </Link>
+          <TabLink
+            to={`/${locale}/check`}
+            label={t("check")}
+            icon={Calculator}
+            active={isCheckActive}
+          />
 
           <TabLink {...main[2]} active={isActive(main[2].to)} />
           <TabLink {...main[3]} active={isActive(main[3].to)} />
@@ -357,18 +344,11 @@ function TabLink({ to, label, icon: Icon, active }: NavLinkProps) {
     <Link
       href={to}
       className={cn(
-        "flex h-full flex-col items-center justify-center gap-0.5 text-[10px] transition-colors",
-        active ? "font-bold text-foreground" : "text-muted-foreground hover:text-foreground"
+        "flex h-full flex-col items-center justify-center gap-0.5 text-[11px] transition-colors",
+        active ? "font-semibold text-primary" : "text-muted-foreground hover:text-foreground"
       )}
     >
-      <span
-        className={cn(
-          "grid h-6 w-10 place-items-center rounded-full transition-all",
-          active && "bg-secondary text-primary"
-        )}
-      >
-        <Icon className="size-4.5" strokeWidth={active ? 2.4 : 1.8} />
-      </span>
+      <Icon className="size-5.5" strokeWidth={active ? 2.4 : 1.8} />
       <span className="leading-none mt-0.5">{label}</span>
     </Link>
   );

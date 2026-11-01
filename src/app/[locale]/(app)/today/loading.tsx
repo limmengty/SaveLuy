@@ -6,7 +6,7 @@ export default function TodayLoading() {
     <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_350px] animate-pulse">
       <div className="space-y-7">
         {/* Hero Card Skeleton */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:p-7 space-y-4">
+        <div className="rounded-[10px] bg-card p-5 lg:p-7 space-y-4">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-14 w-48" />
           <Skeleton className="h-5 w-36" />
@@ -27,7 +27,7 @@ export default function TodayLoading() {
         {/* Activity Skeleton */}
         <div className="space-y-3">
           <Skeleton className="h-4 w-28" />
-          <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <div className="rounded-[10px] bg-card p-4 space-y-3">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />

@@ -356,7 +356,7 @@ export function CheckPanel() {
           className={cn(
             "flex flex-col justify-between overflow-y-auto border-border bg-card p-0",
             mobile
-              ? "max-h-[94dvh] rounded-t-3xl pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+              ? "max-h-[94dvh] rounded-t-[12px] pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
               : "w-[410px] sm:max-w-[410px]"
           )}
         >
@@ -422,7 +422,7 @@ export function CheckPanel() {
                     >
                       <EnvelopeIcon className="size-3" />
                       <span>{isFun ? tToday("funMoney") : tToday("essentials")}</span>
-                      <span className="text-[10px] font-mono opacity-80">
+                      <span className="text-[11px] font-mono opacity-80">
                         ({formatMoney(computed.envelopeRemaining[e])})
                       </span>
                     </button>
@@ -474,7 +474,7 @@ export function CheckPanel() {
                     onChange={(e) => handleInputChange(e.target.value)}
                     placeholder="0"
                     className={cn(
-                      "w-28 sm:w-36 bg-transparent border-none outline-none font-black tracking-tight text-foreground transition-all placeholder:text-muted-foreground/30 focus:ring-0 p-0 selection:bg-primary/20",
+                      "w-28 sm:w-36 bg-transparent border-none outline-none font-black tracking-tight text-foreground transition-all placeholder:text-placeholder focus:ring-0 p-0 selection:bg-primary/20",
                       amount >= 10000000
                         ? "text-xl sm:text-2xl"
                         : amount >= 100000
@@ -511,7 +511,7 @@ export function CheckPanel() {
                   value={customLabel}
                   onChange={(e) => setCustomLabel(e.target.value)}
                   placeholder={t("notePlaceholder")}
-                  className="w-full px-3 py-1.5 pr-8 rounded-xl border border-border/70 bg-card text-foreground text-xs placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary outline-hidden"
+                  className="w-full px-3 py-1.5 pr-8 rounded-xl border border-border/70 bg-card text-foreground text-xs placeholder:text-placeholder focus:ring-1 focus:ring-primary outline-hidden"
                 />
                 {customLabel && (
                   <button
@@ -557,7 +557,7 @@ export function CheckPanel() {
                       <span>{itemLabel}</span>
                       <span
                         className={cn(
-                          "text-[10px] font-mono",
+                          "text-[11px] font-mono",
                           isSelected ? "text-primary-foreground/90" : "text-muted-foreground"
                         )}
                       >
@@ -586,7 +586,7 @@ export function CheckPanel() {
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase">
                       {t("paidAmount")} (USD)
                     </label>
                     <input
@@ -599,7 +599,7 @@ export function CheckPanel() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase">
                       {t("paidAmount")} (KHR)
                     </label>
                     <input
@@ -615,7 +615,7 @@ export function CheckPanel() {
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase">
                       {t("changeReturned")} (USD)
                     </label>
                     <input
@@ -628,7 +628,7 @@ export function CheckPanel() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase">
                       {t("changeReturned")} (KHR)
                     </label>
                     <input
@@ -717,7 +717,7 @@ export function CheckPanel() {
                       key={increment}
                       type="button"
                       onClick={() => addQuickBump(increment)}
-                      className="flex h-8 items-center justify-center rounded-xl border border-border/70 bg-secondary/30 text-xs font-semibold text-foreground hover:bg-secondary active:scale-95 transition-all cursor-pointer shadow-2xs select-none"
+                      className="flex h-10 items-center justify-center rounded-xl border border-border/70 bg-secondary/30 text-xs font-semibold text-foreground hover:bg-secondary active:scale-95 transition-all cursor-pointer shadow-2xs select-none"
                     >
                       {label}
                     </button>
@@ -803,7 +803,7 @@ export function CheckPanel() {
           <div className="space-y-4 py-2">
             {/* Essentials Section */}
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
                 {tToday("essentials")}
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -844,7 +844,7 @@ export function CheckPanel() {
 
             {/* Fun Money Section */}
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
                 {tToday("funMoney")}
               </span>
               <div className="grid grid-cols-2 gap-2">
